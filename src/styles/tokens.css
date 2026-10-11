@@ -1,0 +1,19 @@
+:root{
+ color-scheme:light;
+ font-family:ui-rounded,"Arial Rounded MT Bold","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+ --ink:#283b5a;--muted:#7088a8;--blue:#3881ee;--purple:#8564d8;--orange:#f9a238;
+ --sky:#e8f4ff;--white:#fff;--gap:clamp(5px,1.3dvh,15px);
+ font-synthesis:none;-webkit-tap-highlight-color:transparent;
+}
+*{box-sizing:border-box}
+html,body,#root{margin:0;width:100%;height:100%;overflow:hidden;min-width:0}
+body{background:var(--sky);overscroll-behavior:none}
+button,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+a{text-decoration:none;color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid #114bf1;outline-offset:2px}
+button:disabled{opacity:.46;cursor:not-allowed}
+#root,#root *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#root input,#root textarea,#root [contenteditable="true"],#root .allow-selection{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+#root img{user-select:none;-webkit-user-drag:none}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
