@@ -1,0 +1,11 @@
+{
+  "appId": "com.mrgolftech.kidsvisualdemo",
+  "appName": "Kids UI Demo",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

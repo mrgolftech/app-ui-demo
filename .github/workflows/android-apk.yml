@@ -1,0 +1,61 @@
+name: Android Debug APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'www/**'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: ""
+      - name: Install Android SDK platform
+        run: |
+          sdkmanager --version
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+      - name: Install Capacitor
+        run: npm install --no-audit --no-fund
+      - name: Generate native project
+        run: |
+          npm run lint:js
+          npx cap add android
+          npx cap sync android
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/AndroidManifest.xml')
+          s=p.read_text()
+          needle='android:name=".MainActivity"'
+          assert needle in s, 'Capacitor MainActivity not found'
+          assert 'android:screenOrientation=' not in s
+          p.write_text(s.replace(needle, needle+' android:screenOrientation="sensorLandscape"', 1))
+          PY
+      - name: Build debug APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew --no-daemon assembleDebug
+      - name: Verify APK exists
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          sha256sum android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-ui-demo-landscape-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

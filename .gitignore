@@ -1,0 +1,5 @@
+node_modules/
+android/
+visual-evidence/
+.DS_Store
+*.log

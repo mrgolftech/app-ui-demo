@@ -1,0 +1,38 @@
+name: UI Visual Layout Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'www/**'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/visual-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install tests
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check demo JS
+        run: npm run lint:js
+      - name: Serve demo
+        run: python3 -m http.server 4173 --directory www > /tmp/ui-demo-http.log 2>&1 &
+      - name: Validate 35 screen-size combinations
+        run: |
+          sleep 2
+          npm run test:visual
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-ui-demo-visual-evidence
+          path: visual-evidence/
+          retention-days: 30
