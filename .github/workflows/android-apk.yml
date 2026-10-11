@@ -1,12 +1,8 @@
-name: Android Debug APK
+name: React UI Android Debug APK
 on:
   push:
     branches: [main]
-    paths:
-      - 'www/**'
-      - 'package.json'
-      - 'capacitor.config.json'
-      - '.github/workflows/android-apk.yml'
+    paths: ['src/**','public/**','index.html','package.json','capacitor.config.json','tsconfig.json','vite.config.ts','.github/workflows/android-apk.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,15 +21,16 @@ jobs:
       - uses: android-actions/setup-android@v4
         with:
           packages: ""
-      - name: Install Android SDK platform
+      - name: Android SDK
         run: |
           sdkmanager --version
           sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
-      - name: Install Capacitor
-        run: npm install --no-audit --no-fund
-      - name: Generate native project
+      - name: Compile React UI for offline APK
         run: |
-          npm run lint:js
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Generate Android shell
+        run: |
           npx cap add android
           npx cap sync android
           python3 - <<'PY'
@@ -41,9 +38,9 @@ jobs:
           p=Path('android/app/src/main/AndroidManifest.xml')
           s=p.read_text()
           needle='android:name=".MainActivity"'
-          assert needle in s, 'Capacitor MainActivity not found'
+          assert needle in s, 'MainActivity not found'
           assert 'android:screenOrientation=' not in s
-          p.write_text(s.replace(needle, needle+' android:screenOrientation="sensorLandscape"', 1))
+          p.write_text(s.replace(needle,needle+' android:screenOrientation="sensorLandscape"',1))
           PY
       - name: Build debug APK
         run: |
@@ -56,6 +53,6 @@ jobs:
           sha256sum android/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: app-ui-demo-landscape-debug-apk
+          name: app-ui-demo-react-landscape-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30

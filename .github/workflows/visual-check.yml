@@ -1,12 +1,8 @@
-name: UI Visual Layout Audit
+name: React UI Visual Layout Audit
 on:
   push:
     branches: [main]
-    paths:
-      - 'www/**'
-      - 'tests/**'
-      - 'package.json'
-      - '.github/workflows/visual-check.yml'
+    paths: ['src/**','public/**','tests/**','index.html','package.json','tsconfig.json','vite.config.ts','.github/workflows/visual-check.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,15 +14,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install tests
-        run: npm install --no-audit --no-fund
+      - name: Install and compile
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Check demo JS
-        run: npm run lint:js
-      - name: Serve demo
-        run: python3 -m http.server 4173 --directory www > /tmp/ui-demo-http.log 2>&1 &
-      - name: Validate 35 screen-size combinations
+      - name: Serve production build
+        run: npm run preview > /tmp/ui-demo-preview.log 2>&1 &
+      - name: Test five pages at seven viewport sizes
         run: |
           sleep 2
           npm run test:visual

@@ -1,10 +1,8 @@
-name: Deploy UI Demo to GitHub Pages
+name: Deploy React UI Demo to GitHub Pages
 on:
   push:
     branches: [main]
-    paths:
-      - 'www/**'
-      - '.github/workflows/pages.yml'
+    paths: ['src/**','public/**','index.html','package.json','tsconfig.json','vite.config.ts','.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,15 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and compile
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload isolated static website
+      - name: Upload Vite dist output
         uses: actions/upload-pages-artifact@v3
         with:
-          path: www
+          path: dist
       - name: Deploy
-        id: deployment
         uses: actions/deploy-pages@v4
