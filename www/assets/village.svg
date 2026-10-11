@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="儿童插画中的彩色小商店">
+<rect width="640" height="360" rx="28" fill="#d7ecff"/><circle cx="520" cy="74" r="43" fill="#fff4b6"/>
+<path d="M0 273Q200 251 337 274T640 269V360H0" fill="#a5dca7"/>
+<rect x="177" y="133" width="310" height="193" rx="13" fill="#fff1d7"/>
+<path d="M153 148l58-89h239l61 89Z" fill="#df83ad"/><path d="M156 154h359v45q-19 24-39 0q-20 24-40 0q-18 24-39 0q-19 24-39 0q-19 24-39 0q-19 24-39 0q-19 24-39 0q-18 24-39 0q-19 24-39 0Z" fill="#f7b75d"/>
+<rect x="218" y="220" width="99" height="103" rx="9" fill="#a5d9eb"/>
+<rect x="364" y="218" width="75" height="108" rx="8" fill="#b8866b"/><circle cx="425" cy="279" r="6" fill="#ffe0a7"/>
+<path d="M231 225l75 91M308 227l-77 91" stroke="#fff" stroke-width="8" stroke-opacity=".6"/>
+<text x="330" y="127" font-size="32" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" fill="#86517b">SHOP</text></svg>

@@ -1,15 +1,10 @@
 /* Offline-first visual acceptance only. No live course, network or recording. */
 const app=document.querySelector('#app');
 const state={screen:'home',page:2,sentence:1,wordIndex:0,recording:false,played:false,chosen:'',selectedLetters:[],quiz:0};
-const pages=[
-  {en:'The little rabbit is running.',zh:'小兔子正在奔跑。'},
-  {en:'She can jump over the log.',zh:'她可以跳过木头。'},
-  {en:'What a beautiful sunny day!',zh:'多么美丽的晴天！'},
-  {en:'They play together in the forest.',zh:'他们在森林里一起玩耍。'}
-];
-const words=[{word:'ship',sound:'sh',rest:'ip',zh:'轮船',letters:['s','h','i','p']},{word:'fish',sound:'sh',rest:'fi',zh:'鱼',letters:['f','i','s','h']},{word:'shop',sound:'sh',rest:'op',zh:'商店',letters:['s','h','o','p']}];
-const captions=['Hello, little Fox!','Let’s go to the green forest.','What a beautiful day!','We can sing together.'];
-const questions=[{q:'What is it?',a:'Rabbit',choices:['Rabbit','Tiger','Duck','Fish']},{q:'Which word starts with sh?',a:'Ship',choices:['Cat','Ship','Dog','Sun']}];
+const pages=window.DEMO_DATA.raz.pages;
+const words=window.DEMO_DATA.phonics.words;
+const captions=window.DEMO_DATA.dub.lines;
+const questions=window.DEMO_DATA.quizzes;
 function icon(s){return s}
 function svgScene(kind){
  if(kind==='rabbit')return `<svg class="scene" viewBox="0 0 640 360" role="img" aria-label="森林中的兔子原创示意插画" xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +47,7 @@ function svgScene(kind){
  <path d="M108 127Q135 98 161 126M453 131Q478 102 505 130" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round"/></svg>`;
 }
 const title={home:'小小英语星球',raz:'RAZ 分级阅读',phonics:'Oxford 自然拼读',dub:'Little Fox 动画配音',quiz:'单词闯关'};
-function head(){return `<header class="header"><div class="logo" aria-hidden="true">✦</div>
+function head(){return `<header class="header">${state.screen==='home'?'<div class="logo" aria-hidden="true">✦</div>':'<button type="button" class="header-back" data-action="back" aria-label="返回上一页面">❮ 返回</button>'}
  <div class="brand">${title[state.screen]}</div><span class="header-small">横屏交互视觉样板 · Mock</span>
  <div class="header-center"><span class="pill ${state.screen==='raz'?'active':''}">📖 阅读</span>
  <span class="pill ${state.screen==='phonics'?'active':''}">🔤 拼读</span>
@@ -68,20 +63,22 @@ function home(){return `<div class="page home">
  <button class="course-card phonics" data-open="phonics"><div class="course-bubble"><span>🔤</span></div><h2>自然拼读</h2><p>Oxford Phonics World</p><div class="course-enter">开始拼读 <span>➜</span></div></button>
  <button class="course-card dub" data-open="dub"><div class="course-bubble"><span>🦊</span></div><h2>动画配音</h2><p>Little Fox · 跟读配音</p><div class="course-enter">一起配音 <span>➜</span></div></button>
  </section></div>`;}
-function studyStage(kind,playText,progress){return `<div class="stage scene-${kind}">
- <div class="stage-inner">${svgScene(kind==='dub'?'fox':kind==='phonics'?'ship':'rabbit')}</div>
+function studyStage(kind,playText,progress,art){const files={bird:'bird.svg',pond:'pond.svg',village:'village.svg'};
+ const illustration=art&&files[art]?'<img class="scene" src="./assets/'+files[art]+'" alt="原创儿童学习示意插画" draggable="false">':svgScene(art==='fox'?'fox':art==='ship'?'ship':kind==='dub'?'fox':kind==='phonics'?'ship':'rabbit');
+ return `<div class="stage scene-${kind}" data-swipe-zone="${kind}">
+ <div class="stage-inner">${illustration}</div>
  <div class="stage-counter">${progress}</div>
  <button class="scene-play" data-action="play">▶ ${playText}</button></div>`;}
-function raz(){const p=pages[(state.page-1)%pages.length];return `<div class="page study">
- ${studyStage('raz','听一听 · 模拟朗读',`第 ${state.page} / 12 页`)}
- <section class="panel"><div class="panel-top"><span class="kicker">📖 LEVEL C · FOREST FRIENDS</span><span class="progress">${state.page}/12</span></div>
- <h1>小兔子的森林冒险</h1><p class="sentence">${p.en}</p><span class="translation">${p.zh}</span>
+function raz(){const p=pages[state.page-1];return `<div class="page study">
+ ${studyStage('raz','听一听 · 模拟朗读',`第 ${state.page} / ${pages.length} 页`,p.art)}
+ <section class="panel"><div class="panel-top"><span class="kicker">📖 LEVEL C · FOREST FRIENDS</span><span class="progress">${state.page}/${pages.length}</span></div>
+ <h1>${window.DEMO_DATA.raz.title}</h1><p class="sentence">${p.en}</p><span class="translation">${p.zh}</span>
  <div class="spacer"></div><div class="actions"><button class="btn pale" data-action="prev" aria-label="上一页">❮ 上一页</button>
  <button class="btn blue" data-action="play">🔊 朗读</button><button class="btn pale" data-action="next">下一页 ❯</button></div>
  <div class="subline"><span>点读 · 翻页 · 一屏完成</span><span>● ● ● ○ ○</span></div>
  </section></div>`;}
 function phonics(){const w=words[state.wordIndex%words.length];return `<div class="page study">
- ${studyStage('phonics','听单词 · 模拟发音',`Unit 3 · ${state.wordIndex+1}/3`)}
+ ${studyStage('phonics','听单词 · 模拟发音',`Unit 3 · ${state.wordIndex+1}/${words.length}`,w.art)}
  <section class="panel"><div class="panel-top"><span class="kicker">🔤 OXFORD PHONICS WORLD 3</span><span class="progress">Unit 3</span></div>
  <h1>今天认识字母组合 <span style="color:#8963de">sh</span></h1>
  <p class="sentence">拼出单词：<span style="color:#8963de">${w.sound}</span>${w.rest}</p>
@@ -91,17 +88,17 @@ function phonics(){const w=words[state.wordIndex%words.length];return `<div clas
  <button class="btn purple" data-action="check">✓ 检查拼写</button><button class="btn pale" data-action="nextword">下一词 ❯</button></div>
  <div class="subline"><span>示意音频与拼写，不接真实评分服务</span><span>${state.selectedLetters.map(i=>w.letters[i]).join('').toUpperCase()||'○ ○ ○ ○'}</span></div></section></div>`;}
 function dub(){return `<div class="page study">
- ${studyStage('dub','▶ 预览动画画面',`Little Fox · ${state.sentence}/4 句`)}
+ ${studyStage('dub','▶ 预览动画画面',`Little Fox · ${state.sentence}/${captions.length} 句`,captions[state.sentence-1].art)}
  <section class="panel"><div class="panel-top"><span class="kicker" style="color:#d98b26">🎬 LITTLE FOX · GREEN FOREST</span><span class="progress">${state.sentence}/4</span></div>
- <h1>我来给小狐狸配音！</h1><p class="sentence">${captions[state.sentence-1]}</p>
- <span class="translation">听一听 · 跟着说 · 再录一遍</span>
+ <h1>我来给小狐狸配音！</h1><p class="sentence">${captions[state.sentence-1].en}</p>
+ <span class="translation">${captions[state.sentence-1].zh} · 跟着说</span>
  <div class="spacer"></div><div class="actions">
  <button class="btn pale" data-action="prevsentence" aria-label="上一句">❮ 上句</button>
  <button class="btn orange" data-action="record">${state.recording?'■ 停止模拟录音':'🎙 开始配音'}</button>
  <button class="btn pale" data-action="nextsentence" aria-label="下一句">下句 ❯</button></div>
  <div class="subline"><span>${state.recording?'● 录音中（仅界面状态）':'模拟流程 · 暂不采集麦克风'}</span><span>🎧 语速 1.0×</span></div></section></div>`;}
 function quiz(){const q=questions[state.quiz%questions.length];return `<div class="page study">
- ${studyStage('phonics','🔊 听题（演示）',`第 ${state.quiz+1}/2 题`)}
+ ${studyStage('phonics','🔊 听题（演示）',`第 ${state.quiz+1}/${questions.length} 题`,q.art)}
  <section class="panel"><div class="panel-top"><span class="kicker">⭐ WORD CHALLENGE</span><span class="progress">+${state.chosen===q.a?10:0} 分</span></div>
  <h1>${q.q}</h1><p class="translation">看插画，选出正确的英文单词</p>
  <div class="answers">${q.choices.map(c=>`<button class="answer ${state.chosen===c?(c===q.a?'correct':'wrong'):''}" data-choice="${c}">${c}</button>`).join('')}</div>
@@ -109,30 +106,119 @@ function quiz(){const q=questions[state.quiz%questions.length];return `<div clas
  <button class="btn blue" data-action="nextquiz">下一题 ❯</button></div>
  <div class="subline"><span>${state.chosen?(state.chosen===q.a?'太棒啦！答对了！':'再想想，继续尝试吧！'):'一次只完成一道互动题目'}</span><span>🌟 加油</span></div></section></div>`;}
 let toastTimer;
-function notify(s){document.querySelector('.toast')?.remove();const t=document.createElement('div');t.className='toast';t.textContent=s;app.appendChild(t);clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.remove(),1400);}
-function render(){app.className='app theme-'+state.screen;app.innerHTML=head()+`<main class="main">${({home,raz,phonics,dub,quiz})[state.screen]()}</main>`+nav();}
-function open(s){state.screen=s;state.recording=false;state.chosen='';render();}
+function notify(s){
+ document.querySelector('.toast')?.remove();
+ const t=document.createElement('div');t.className='toast';t.textContent=s;
+ app.appendChild(t);clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.remove(),1700);
+}
+function render(){
+ app.className='app theme-'+state.screen;
+ app.dataset.screen=state.screen;
+ app.innerHTML=head()+'<main class="main">'+({home,raz,phonics,dub,quiz})[state.screen]()+'</main>'+nav();
+}
+let routeDepth=0;
+let lastExitRequest=0;
+window.history.replaceState({uiDemo:true,screen:'home',depth:0},'');
+function open(s,{replace=false}={}){
+ if(!({home,raz,phonics,dub,quiz})[s]||s===state.screen)return;
+ if(replace){
+   window.history.replaceState({uiDemo:true,screen:s,depth:routeDepth},'');
+ }else{
+   routeDepth++;
+   window.history.pushState({uiDemo:true,screen:s,depth:routeDepth},'');
+ }
+ state.screen=s;state.recording=false;state.chosen='';render();
+}
+window.addEventListener('popstate',({state:route})=>{
+ routeDepth=route?.uiDemo?route.depth:0;
+ state.screen=route?.uiDemo&&({home,raz,phonics,dub,quiz})[route.screen]?route.screen:'home';
+ state.recording=false;state.chosen='';render();
+});
+function goBack(){
+ if(routeDepth>0){window.history.back();return;}
+ if(state.screen!=='home'){open('home',{replace:true});return;}
+ const now=Date.now();
+ if(now-lastExitRequest<2200){
+   const nativeApp=window.Capacitor?.Plugins?.App;
+   if(nativeApp?.exitApp){nativeApp.exitApp().catch(()=>notify('请使用系统手势退出'));}
+   else notify('演示首页 · 再次返回将退出 Android App');
+ }else{lastExitRequest=now;notify('再按一次返回退出应用');}
+}
+function nativeBackSetup(){
+ // Capacitor 8 injects its native plugin proxies into the Android WebView.
+ // In a regular browser this is absent; normal browser history still works.
+ const nativeApp=window.Capacitor?.Plugins?.App;
+ if(!nativeApp?.addListener)return;
+ nativeApp.addListener('backButton',()=>goBack()).catch(err=>{
+   console.warn('Native back button listener unavailable:',err);
+ });
+}
+function changeStudy(action){
+ if(action==='next'){state.page=state.page%pages.length+1;}
+ else if(action==='prev'){state.page=Math.max(1,state.page-1);}
+ else if(action==='nextword'){state.wordIndex=(state.wordIndex+1)%words.length;state.selectedLetters=[];}
+ else if(action==='clear'){state.selectedLetters=[];}
+ else if(action==='record'){state.recording=!state.recording;notify(state.recording?'模拟录音中，不使用麦克风':'模拟录音完成');}
+ else if(action==='nextsentence'){state.sentence=state.sentence%captions.length+1;}
+ else if(action==='prevsentence'){state.sentence=Math.max(1,state.sentence-1);}
+ else if(action==='nextquiz'){state.quiz=(state.quiz+1)%questions.length;state.chosen='';}
+ else if(action==='play'){notify('🔊 音视频为视觉演示；未接入真实媒体');return;}
+ else if(action==='check'){
+   const w=words[state.wordIndex%words.length];
+   notify(state.selectedLetters.map(i=>w.letters[i]).join('')===w.word?'🎉 拼写正确！':'再试一次，加油！');
+   return;
+ }
+ else if(action==='back'){goBack();return;}
+ else return;
+ render();
+}
 app.addEventListener('click',e=>{
  const el=e.target.closest('button');if(!el)return;
- const o=el.dataset.open;if(o){open(o);return;}
- const a=el.dataset.action;
- if(el.dataset.letter!==undefined){const i=Number(el.dataset.letter);state.selectedLetters.push(i);render();return;}
+ if(el.dataset.open){open(el.dataset.open);return;}
+ if(el.dataset.letter!==undefined){
+  const i=Number(el.dataset.letter);
+  if(!state.selectedLetters.includes(i)){state.selectedLetters.push(i);render();}
+  return;
+ }
  if(el.dataset.choice){state.chosen=el.dataset.choice;render();return;}
- if(a==='next')state.page=state.page%12+1;
- else if(a==='prev')state.page=Math.max(1,state.page-1);
- else if(a==='nextword'){state.wordIndex=(state.wordIndex+1)%words.length;state.selectedLetters=[];}
- else if(a==='clear')state.selectedLetters=[];
- else if(a==='check'){const w=words[state.wordIndex%words.length];notify(state.selectedLetters.map(i=>w.letters[i]).join('')===w.word?'🎉 拼写正确！':'再试一次，加油！');}
- else if(a==='record'){state.recording=!state.recording;notify(state.recording?'模拟录音中，不使用麦克风':'模拟录音完成');}
- else if(a==='nextsentence')state.sentence=state.sentence%4+1;
- else if(a==='prevsentence')state.sentence=Math.max(1,state.sentence-1);
- else if(a==='nextquiz'){state.quiz=(state.quiz+1)%questions.length;state.chosen='';}
- else if(a==='play'){notify('🔊 音视频为视觉演示；未接入真实媒体');return;}
- if(a!=='check')render();
+ changeStudy(el.dataset.action);
+});
+// Within the media stage, swiping across a page changes the learning card;
+// exclude 32 CSS px at both viewport edges so Android system gestures win.
+let touchStart=null;
+app.addEventListener('pointerdown',e=>{
+ if(e.pointerType!=='touch'||e.button!==0||e.target.closest('button')||!e.target.closest('[data-swipe-zone]'))return;
+ if(e.clientX<32||e.clientX>innerWidth-32)return;
+ touchStart={id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now(),screen:state.screen};
+});
+app.addEventListener('pointercancel',()=>{touchStart=null;});
+app.addEventListener('pointerup',e=>{
+ if(!touchStart||e.pointerId!==touchStart.id)return;
+ const start=touchStart;touchStart=null;
+ if(start.screen!==state.screen||Date.now()-start.time>1200)return;
+ const dx=e.clientX-start.x,dy=e.clientY-start.y;
+ if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.35)return;
+ const forward=dx<0;
+ if(state.screen==='raz')changeStudy(forward?'next':'prev');
+ else if(state.screen==='dub')changeStudy(forward?'nextsentence':'prevsentence');
+ else if(state.screen==='phonics'&&forward)changeStudy('nextword');
+ else if(state.screen==='quiz'&&forward)changeStudy('nextquiz');
 });
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'||e.key==='Backspace'&&e.target.tagName!=='INPUT'){open('home');}
- if(e.key==='ArrowRight'&&state.screen==='raz'){state.page=state.page%12+1;render();}
- if(e.key==='ArrowLeft'&&state.screen==='raz'){state.page=Math.max(1,state.page-1);render();}
+ if(e.key==='Escape'||(e.key==='Backspace'&&!e.target.matches('input,textarea,[contenteditable]'))){
+  e.preventDefault();goBack();
+ }else if(e.key==='ArrowRight'){
+  if(state.screen==='raz')changeStudy('next');
+  else if(state.screen==='dub')changeStudy('nextsentence');
+ }else if(e.key==='ArrowLeft'){
+  if(state.screen==='raz')changeStudy('prev');
+  else if(state.screen==='dub')changeStudy('prevsentence');
+ }
+});
+// Avoid OS long-press context menus on decorative illustrations in the demo.
+// Native selections should remain possible in future input/textarea exercises.
+app.addEventListener('contextmenu',event=>{
+ if(!event.target.closest('input,textarea,[contenteditable],.allow-selection'))event.preventDefault();
 });
 render();
+nativeBackSetup();
