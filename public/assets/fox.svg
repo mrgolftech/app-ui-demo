@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="小狐狸森林动画示意场景" xmlns="http://www.w3.org/2000/svg">
+ <rect width="640" height="360" rx="30" fill="#a5dbca"/><circle cx="524" cy="79" r="47" fill="#ffefd0"/>
+ <path d="M0 252Q160 199 320 244T640 235V360H0" fill="#7ac18e"/>
+ <g fill="#568f77"><circle cx="92" cy="115" r="74"/><circle cx="535" cy="139" r="92"/><circle cx="606" cy="95" r="65"/></g>
+ <path d="M104 150V345M532 165V352" stroke="#a97755" stroke-width="22"/>
+ <g transform="translate(314 75)"><path d="M-115 133L-92 13L-24 83L32 82L98 5L119 139Z" fill="#f58c42"/>
+ <path d="M-93 34L-77 89L-38 91Z M83 30L46 91L89 90Z" fill="#ffd2b6"/>
+ <ellipse cy="170" rx="118" ry="104" fill="#ef8d43"/>
+ <path d="M-75 187Q0 126 76 187Q58 243 0 252Q-57 244-75 187" fill="#fff5e6"/>
+ <ellipse cx="-43" cy="158" rx="9" ry="12" fill="#453e49"/><ellipse cx="43" cy="158" rx="9" ry="12" fill="#453e49"/>
+ <ellipse cy="202" rx="13" ry="10" fill="#403744"/><path d="M0 207q-18 22 -31 3M0 207q18 22 31 3" stroke="#443b44" stroke-width="4" fill="none"/></g>
+ <g fill="#fcf0a1"><circle cx="178" cy="269" r="7"/><circle cx="205" cy="284" r="6"/><circle cx="464" cy="290" r="8"/></g></svg>

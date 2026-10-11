@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="森林中的兔子原创示意插画" xmlns="http://www.w3.org/2000/svg">
+ <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9bd7ff"/><stop offset="1" stop-color="#e2f6ff"/></linearGradient></defs>
+ <rect width="640" height="360" rx="30" fill="url(#sky)"/><circle cx="543" cy="68" r="39" fill="#fff4a0"/>
+ <path d="M0 239Q160 172 290 236T640 218V360H0Z" fill="#a8dc8a"/>
+ <path d="M0 291Q140 254 282 292T640 274V360H0Z" fill="#6ec7a0"/>
+ <g fill="#6bb58f"><circle cx="95" cy="155" r="71"/><circle cx="153" cy="168" r="54"/><circle cx="490" cy="164" r="60"/><circle cx="551" cy="176" r="47"/></g>
+ <path d="M123 130V309M512 128V316" stroke="#997554" stroke-width="18" stroke-linecap="round"/>
+ <g transform="translate(306 85)">
+ <ellipse cx="-30" cy="73" rx="29" ry="79" fill="white" transform="rotate(-14 -30 73)"/>
+ <ellipse cx="35" cy="70" rx="29" ry="79" fill="white" transform="rotate(11 35 70)"/>
+ <ellipse cx="-30" cy="73" rx="13" ry="54" fill="#ffc0d5" transform="rotate(-14 -30 73)"/>
+ <ellipse cx="35" cy="70" rx="13" ry="54" fill="#ffc0d5" transform="rotate(11 35 70)"/>
+ <ellipse cx="0" cy="235" rx="91" ry="71" fill="#fff"/>
+ <circle cy="164" r="70" fill="#fff"/><ellipse cx="-28" cy="151" rx="7" ry="10" fill="#41506c"/><ellipse cx="30" cy="151" rx="7" ry="10" fill="#41506c"/>
+ <ellipse cy="175" rx="11" ry="8" fill="#ff9ca7"/><path d="M0 182q-12 20 -24 1M0 182q12 20 24 1" stroke="#8f899d" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <ellipse cx="-62" cy="290" rx="34" ry="17" fill="#fff"/><ellipse cx="60" cy="290" rx="34" ry="17" fill="#fff"/>
+ </g><g fill="#fff"><circle cx="204" cy="70" r="9"/><circle cx="225" cy="66" r="12"/><circle cx="247" cy="73" r="8"/></g>
+ <g fill="#ffb55e"><circle cx="223" cy="310" r="8"/><circle cx="556" cy="302" r="8"/></g></svg>
