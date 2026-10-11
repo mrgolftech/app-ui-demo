@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="森林中的兔子原创示意插画" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 640 360" role="img" aria-label="森林中的兔子原创示意插画" xmlns="http://www.w3.org/2000/svg">
  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9bd7ff"/><stop offset="1" stop-color="#e2f6ff"/></linearGradient></defs>
  <rect width="640" height="360" rx="30" fill="url(#sky)"/><circle cx="543" cy="68" r="39" fill="#fff4a0"/>
  <path d="M0 239Q160 172 290 236T640 218V360H0Z" fill="#a8dc8a"/>
