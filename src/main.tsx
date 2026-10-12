@@ -16,6 +16,7 @@ import './styles/shell.css';
 import './styles/study.css';
 import './styles/home.css';
 import './styles/login.css';
+import './styles/study-exit.css';
 
 function LoginRoute(){
  const {signedIn}=useDemoAuth();

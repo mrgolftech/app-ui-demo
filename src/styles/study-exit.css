@@ -1,0 +1,58 @@
+/* No app header while practising: the art stage and exercises use full height. */
+.app-shell--practice{
+ grid-template-rows:minmax(0,1fr);
+ gap:0;
+}
+.study-layout{position:relative}
+.practice-back{
+ position:absolute;z-index:5;top:clamp(9px,1.4dvh,19px);left:clamp(9px,1.1vw,17px);
+ display:flex;align-items:center;justify-content:center;gap:5px;min-width:82px;
+ min-height:46px;padding:6px 12px;border:0;border-radius:999px;background:#ffffffed;
+ color:#3375c5;font-weight:900;font-size:clamp(13px,1.2vw,17px);
+ box-shadow:0 6px 16px #3c6eab2a;touch-action:manipulation;
+}
+.practice-back:active{background:#e3f1ff}
+.media-stage__counter{left:auto;right:clamp(9px,1.1vw,17px);top:clamp(9px,1.4dvh,19px)}
+.practice-exit-backdrop{
+ position:fixed;inset:0;z-index:100;
+ display:flex;align-items:center;justify-content:center;
+ background:#1e345d86;
+ padding:max(9px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
+         max(9px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+}
+.practice-exit-dialog{
+ position:relative;width:min(460px,88vw);max-height:92dvh;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:clamp(8px,1.3dvh,14px);padding:clamp(13px,2.4dvh,24px) clamp(15px,2.3vw,26px);
+ border-radius:25px;background:#fff;box-shadow:0 23px 75px #102c5d65;
+ color:var(--ink);text-align:center;overflow:hidden;
+}
+.practice-exit-close{
+ position:absolute;right:8px;top:8px;width:44px;height:44px;
+ display:grid;place-items:center;border:0;border-radius:50%;color:#9aabc1;background:#f4f8fd;
+}
+.practice-exit-illustration{font-size:clamp(29px,6.5dvh,59px);line-height:1.05}
+.practice-exit-dialog h2{font-size:clamp(19px,2.3vw,27px);font-weight:950;line-height:1.23;margin:0}
+.practice-exit-dialog p{font-size:clamp(12px,1.2vw,16px);color:#7d93b0;line-height:1.35;margin:0}
+.practice-exit-actions{display:flex;width:100%;gap:clamp(8px,1vw,14px)}
+.practice-exit-actions button{
+ flex:1;min-width:0;min-height:48px;display:flex;justify-content:center;align-items:center;gap:5px;
+ padding:7px 10px;border:0;border-radius:15px;font-size:clamp(12px,1.3vw,17px);
+ font-weight:900;white-space:nowrap;
+}
+.practice-exit-continue{background:#3885ea;color:white;box-shadow:0 5px 15px #3987eb39}
+.practice-exit-confirm{background:#eaf0f7;color:#637996}
+@media(max-height:470px) and (orientation:landscape){
+ .practice-back{min-height:44px;min-width:76px;top:6px;left:7px;padding:5px 9px;font-size:12px}
+ .media-stage__counter{top:7px;right:7px}
+ .practice-exit-dialog{gap:7px;padding:11px 17px}
+ .practice-exit-illustration{font-size:30px}
+ .practice-exit-dialog h2{font-size:18px}
+ .practice-exit-dialog p{font-size:12px}
+ .practice-exit-actions button{min-height:44px;font-size:12px}
+}
+@media(orientation:portrait){
+ .practice-exit-dialog{width:min(460px,94vw)}
+ .practice-exit-actions{gap:7px}
+ .practice-exit-actions button{font-size:12px;padding:7px 4px}
+}
