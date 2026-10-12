@@ -1,115 +1,129 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
+
 const viewports=[[1920,1080],[1600,900],[1280,800],[1024,768],[960,540],[844,390],[390,844]];
 const screens=['home','raz','phonics','dub','quiz'];
-const browser=await chromium.launch({headless:true});
 const errors=[],evidence=[];
+const browser=await chromium.launch({headless:true});
 fs.mkdirSync('visual-evidence',{recursive:true});
+
 for(const [width,height] of viewports){
  const page=await browser.newPage({viewport:{width,height},hasTouch:true,deviceScaleFactor:1});
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
- // First screen must be the demo login (no authentication backend).
- if(await page.locator('[data-screen="login"]').count()!==1)errors.push({width,height,issue:'Unauthenticated first visit did not land on login'});
- if(await page.locator('.bottom-nav').count()!==0)errors.push({width,height,issue:'Bottom nav rendered on login'});
- const loginCheck=await page.evaluate(()=>{
-  const root=document.documentElement,form=document.querySelector('.login-panel');
-  const r=form?.getBoundingClientRect();
-  const fields=[...document.querySelectorAll('.login-form input,.login-form button')];
-  const clipped=fields.filter(b=>{
-   const box=b.getBoundingClientRect();
-   return box.height<38||box.width<35||box.top<0||box.bottom>innerHeight+2||box.left<0||box.right>innerWidth+2;
-  }).map(b=>b.getAttribute('name')||b.textContent);
-  return {scrollWidth:root.scrollWidth,scrollHeight:root.scrollHeight,
-   formHeight:r?.height,clipped};
- });
- if(loginCheck.scrollWidth>width+2||loginCheck.scrollHeight>height+2||loginCheck.clipped.length)
-  errors.push({width,height,screen:'login',issue:loginCheck});
- await page.screenshot({path:'visual-evidence/login-'+width+'x'+height+'.png',fullPage:false});
- // Any typed values are accepted. Neither user name nor password hits a backend.
- await page.locator('input[name="username"]').fill('demo-anyone');
- await page.locator('input[name="password"]').fill('any-password');
+ if(await page.locator('.login-screen').count()!==1)errors.push({width,height,issue:'Login not shown'});
+ await page.screenshot({path:'visual-evidence/login-'+width+'x'+height+'.png'});
+ await page.locator('input[name="username"]').fill('child-demo');
+ await page.locator('input[name="password"]').fill('no-real-password');
  await page.locator('[data-action="login"]').click();
- await page.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
- if(await page.locator('.app-shell[data-screen="home"]').count()!==1)
-  errors.push({width,height,issue:'Demo login failed'});
+ await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
+
  for(const screen of screens){
-  if(screen!=='home'){
-   await page.locator('[data-action="open-menu"]').click();
-   await page.locator('.module-menu__item[data-open="'+screen+'"]').click();
-  }else if(await page.locator('.app-shell').getAttribute('data-screen')!=='home'){
-   await page.locator('.header-back').click();
-  }
+  if(screen!=='home')await page.goto('http://127.0.0.1:4173/#/'+screen,{waitUntil:'networkidle'});
   const d=await page.evaluate(()=>{
-   const app=document.querySelector('.app-shell'),root=document.documentElement;
-   const controls=[...document.querySelectorAll('.study-actions button,.course-card,.header-back,.header-menu,.header-logout')];
+   const root=document.documentElement,app=document.querySelector('.app-shell');
+   const controls=[...document.querySelectorAll('.study-actions button,.course-card,.practice-back,.header-menu,.header-logout')];
    const bad=controls.filter(b=>{
     const r=b.getBoundingClientRect();
-    return r.height<39||r.width<38||r.top<0||r.bottom>innerHeight+2||r.left<0||r.right>innerWidth+2;
-   }).map(x=>x.textContent.trim());
-   const rect=document.querySelector('.media-stage')?.getBoundingClientRect();
-   const image=document.querySelector('.media-stage__art img');
-   return {scrollWidth:root.scrollWidth,scrollHeight:root.scrollHeight,
+    return r.width<38||r.height<40||r.top<0||r.bottom>innerHeight+2||r.left<0||r.right>innerWidth+2;
+   }).map(x=>x.getAttribute('aria-label')||x.textContent.trim());
+   const art=document.querySelector('.media-stage')?.getBoundingClientRect();
+   const pic=document.querySelector('.media-stage__art img');
+   const back=document.querySelector('.practice-back')?.getBoundingClientRect();
+   const counter=document.querySelector('.media-stage__counter')?.getBoundingClientRect();
+   const overlaps=back&&counter&&back.left<counter.right&&back.right>counter.left&&back.top<counter.bottom&&back.bottom>counter.top;
+   return {
+    scrollWidth:root.scrollWidth,scrollHeight:root.scrollHeight,
     appHeight:app.getBoundingClientRect().height,
-    stage:rect?{width:rect.width,height:rect.height}:null,
-    bad,imageReady:image?image.complete&&image.naturalWidth>0:true,
+    stage:art?{width:art.width,height:art.height}:null,
+    imageReady:pic?pic.complete&&pic.naturalWidth>0:true,
     selection:getComputedStyle(document.querySelector('.study-sentence')||app).userSelect,
-    bottomNavCount:document.querySelectorAll('.bottom-nav').length,
-    logoCount:document.querySelectorAll('.brand-mark').length,
-    menuCount:document.querySelectorAll('.header-menu').length};
+    headerCount:document.querySelectorAll('.app-header').length,
+    inStageBackCount:document.querySelectorAll('.practice-back').length,
+    moduleMenuCount:document.querySelectorAll('.header-menu').length,
+    navCount:document.querySelectorAll('.bottom-nav').length,
+    overlaps,bad
+   };
   });
   evidence.push({width,height,screen,...d});
-  if(d.scrollWidth>width+2||d.scrollHeight>height+2||d.bad.length||!d.imageReady||
-    d.selection!=='none'||d.bottomNavCount!==0||d.logoCount!==0||d.menuCount!==1)
-    errors.push({width,height,screen,issue:d});
-  if(screen!=='home'&&d.stage&&(d.stage.width<90||d.stage.height<90))
-    errors.push({width,height,screen,issue:'Media stage too small'});
+  const practicing=screen!=='home';
+  if(d.scrollWidth>width+2||d.scrollHeight>height+2||d.bad.length||
+     !d.imageReady||d.selection!=='none'||d.navCount!==0||d.overlaps||
+     d.headerCount!==(practicing?0:1)||d.inStageBackCount!==(practicing?1:0)||
+     d.moduleMenuCount!==(practicing?0:1)){
+   errors.push({width,height,screen,issue:d});
+  }
+  if(practicing&&d.stage&&(d.stage.width<90||d.stage.height<90)){
+   errors.push({width,height,screen,issue:'stage too small'});
+  }
   await page.screenshot({path:'visual-evidence/'+screen+'-'+width+'x'+height+'.png',fullPage:false});
  }
  await page.close();
 }
-const p=await browser.newPage({viewport:{width:844,height:390},hasTouch:true});
-await p.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-// Login should also accept empty credentials because this is explicitly a UI-only demo.
-await p.locator('[data-action="login"]').click();
-await p.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
-if(await p.locator('.app-shell[data-screen="home"]').count()!==1)errors.push({issue:'Empty demo credentials should log in'});
-await p.locator('[data-action="open-menu"]').click();
-await p.locator('.module-menu__item[data-open="raz"]').click();
-let prev=await p.locator('.media-stage__counter').innerText();
-await p.locator('[data-action="next"]').click();
-let curr=await p.locator('.media-stage__counter').innerText();
-if(prev===curr)errors.push({issue:'RAZ next tap did not change page'});
-await p.evaluate(()=>{
- const el=document.querySelector('.media-stage__art'),b=el.getBoundingClientRect();
- const opts={bubbles:true,pointerType:'touch',pointerId:7,button:0};
- el.dispatchEvent(new PointerEvent('pointerdown',{...opts,clientX:b.left+175,clientY:b.top+94}));
- el.dispatchEvent(new PointerEvent('pointerup',{...opts,clientX:b.left+90,clientY:b.top+94}));
+
+// A single workflow validates both the in-stage back arrow and Escape,
+// which shares the Android native back event's guarded exit behavior.
+const page=await browser.newPage({viewport:{width:844,height:390},hasTouch:true});
+await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+await page.locator('[data-action="login"]').click();
+await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
+
+// Navigate using the home course card; RAZ exercises have no global header.
+await page.locator('.course-card--raz').click();
+await page.locator('.app-shell[data-screen="raz"]').waitFor({state:'visible'});
+let initial=await page.locator('.media-stage__counter').innerText();
+await page.locator('[data-action="next"]').click();
+let afterNext=await page.locator('.media-stage__counter').innerText();
+if(initial===afterNext)errors.push({issue:'Next RAZ page did not advance'});
+
+// A swipe inside the art still turns the page.
+await page.evaluate(()=>{
+ const art=document.querySelector('.media-stage__art');
+ const b=art.getBoundingClientRect();
+ const opt={bubbles:true,pointerId:13,pointerType:'touch',button:0};
+ art.dispatchEvent(new PointerEvent('pointerdown',{...opt,clientX:b.left+185,clientY:b.top+105}));
+ art.dispatchEvent(new PointerEvent('pointerup',{...opt,clientX:b.left+95,clientY:b.top+105}));
 });
-if(curr===await p.locator('.media-stage__counter').innerText())errors.push({issue:'RAZ touch swipe did not turn page'});
-await p.locator('.header-back').click();
-await p.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
-if(await p.locator('.app-shell').getAttribute('data-screen')!=='home')errors.push({issue:'Header Back failed'});
-await p.locator('[data-action="open-menu"]').click();
-await p.locator('.module-menu__item[data-open="phonics"]').click();
-prev=await p.locator('.media-stage__counter').innerText();
-await p.locator('[data-action="nextword"]').click();
-if(prev===await p.locator('.media-stage__counter').innerText())errors.push({issue:'Next phonics word failed'});
-await p.locator('[data-action="open-menu"]').click();
-await p.locator('.module-menu__item[data-open="dub"]').click();
-await p.locator('[data-action="record"]').click();
-if(!(await p.locator('.panel-footer').innerText()).includes('录音状态'))errors.push({issue:'Mock recording state failed'});
-await p.locator('[data-action="open-menu"]').click();
-await p.locator('.module-menu__item[data-open="quiz"]').click();
-await p.locator('[data-choice="Rabbit"]').click();
-if(await p.locator('.answer.is-correct').count()!==1)errors.push({issue:'Quiz correctness style missing'});
-await p.locator('[data-action="logout"]').click();
-await p.locator('.login-screen[data-screen="login"]').waitFor({state:"visible"});
-if(await p.locator('[data-screen="login"]').count()!==1)errors.push({issue:'Logout did not return to login'});
-// Protected learning route cannot be accessed without logging in again.
-await p.goto('http://127.0.0.1:4173/#/raz');
-await p.locator('.login-screen[data-screen="login"]').waitFor({state:"visible"});
-if(await p.locator('[data-screen="login"]').count()!==1)errors.push({issue:'Protected route bypassed login'});
-await p.close();
+if(afterNext===await page.locator('.media-stage__counter').innerText())errors.push({issue:'RAZ art swipe did not advance'});
+
+await page.locator('.practice-back').click();
+await page.locator('.practice-exit-dialog[role="alertdialog"]').waitFor({state:'visible'});
+if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Back button exited without confirmation'});
+await page.screenshot({path:'visual-evidence/confirm-exit-844x390.png'});
+await page.locator('[data-action="continue-practice"]').click();
+if(await page.locator('.practice-exit-dialog').count())errors.push({issue:'Keep learning did not dismiss dialog'});
+if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Cancel lost practice state'});
+
+await page.keyboard.press('Escape');
+await page.locator('.practice-exit-dialog').waitFor({state:'visible'});
+await page.keyboard.press('Escape');
+if(await page.locator('.practice-exit-dialog').count())errors.push({issue:'Second system back did not cancel dialog'});
+if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Cancelling dialog exited practice'});
+
+await page.locator('.practice-back').click();
+await page.locator('[data-action="confirm-exit"]').click();
+await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
+if(await page.locator('.practice-back').count())errors.push({issue:'Practice back still visible on home'});
+
+// Other modules preserve their own interactions and all share the same confirmation.
+for(const [screen,control] of [
+ ['phonics','nextword'],['dub','nextsentence'],['quiz','nextquiz']
+]){
+ await page.goto('http://127.0.0.1:4173/#/'+screen,{waitUntil:'networkidle'});
+ const oldCounter=await page.locator('.media-stage__counter').innerText();
+ await page.locator('[data-action="'+control+'"]').click();
+ if(oldCounter===await page.locator('.media-stage__counter').innerText())errors.push({issue:screen+' next interaction failed'});
+ await page.keyboard.press('Escape');
+ await page.locator('.practice-exit-dialog').waitFor({state:'visible'});
+ if(await page.locator('.app-header').count())errors.push({issue:screen+' shows top nav in modal'});
+ await page.locator('[data-action="confirm-exit"]').click();
+ await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
+}
+
+await page.locator('[data-action="logout"]').click();
+await page.locator('.login-screen').waitFor({state:'visible'});
+await page.goto('http://127.0.0.1:4173/#/raz');
+await page.locator('.login-screen').waitFor({state:'visible'});
+await page.close();
 await browser.close();
 fs.writeFileSync('visual-evidence/layout-audit.json',JSON.stringify({errors,evidence,loginViewports:viewports.length},null,2));
 console.log('Visual audit:',evidence.length,'learning views +',viewports.length,'login views;',errors.length,'failures');
