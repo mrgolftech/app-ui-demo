@@ -23,15 +23,16 @@ function transformed(scale, offsetX, offsetY) {
 }
 const lightTile = wrap(
   '<defs><linearGradient id="tile" x2="1" y2="1"><stop stop-color="#FCFDFF"/><stop offset="1" stop-color="#EAF0FF"/></linearGradient></defs>' +
+  '<rect width="512" height="512" fill="#F4F8FF"/>' +
   '<rect width="512" height="512" rx="112" fill="url(#tile)"/>' +
   transformed(0.87, 33.3, 31.5)
 );
 const darkTile = wrap('<rect width="512" height="512" rx="72" fill="#081334"/>' + transformed(0.91, 23, 19));
 const foreground = wrap(transformed(0.73, 69, 69));
 const horizontal = wrap(transformed(0.58, 12, 19) +
-  '<text x="335" y="224" font-size="119" font-weight="800" font-family="Noto Sans CJK SC,Noto Sans SC,Microsoft YaHei,sans-serif" fill="#17235B" letter-spacing="3">彩虹书架</text>', '0 0 1180 330');
+  '<text x="335" y="224" font-size="119" font-weight="800" font-family="Noto Sans CJK SC,Noto Sans SC,Microsoft YaHei,sans-serif" fill="#17235B" letter-spacing="3">彩虹书架</text>', '0 0 870 330');
 const horizontalDark = wrap(transformed(0.58, 12, 19) +
-  '<text x="335" y="224" font-size="119" font-weight="800" font-family="Noto Sans CJK SC,Noto Sans SC,Microsoft YaHei,sans-serif" fill="#FFFFFF" letter-spacing="3">彩虹书架</text>', '0 0 1180 330');
+  '<text x="335" y="224" font-size="119" font-weight="800" font-family="Noto Sans CJK SC,Noto Sans SC,Microsoft YaHei,sans-serif" fill="#FFFFFF" letter-spacing="3">彩虹书架</text>', '0 0 870 330');
 
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
@@ -61,8 +62,8 @@ await Promise.all([
 ]);
 for (const size of [128,256,512,1024]) await png('logo-mark-'+size+'.png', mark, size);
 for (const size of [192,512,1024]) await png('app-icon-'+size+'.png', lightTile, size);
-await png('logo-horizontal-1180.png', horizontal, 1180,330);
-await png('logo-horizontal-dark-1180.png', horizontalDark, 1180,330);
+await png('logo-horizontal-870.png', horizontal, 870,330);
+await png('logo-horizontal-dark-870.png', horizontalDark, 870,330);
 await png('logo-dark-tile-512.png', darkTile, 512);
 for (const size of [16,32,48]) await png('favicon-'+size+'.png', favicon, size);
 await png('apple-touch-icon-180.png', lightTile, 180);
