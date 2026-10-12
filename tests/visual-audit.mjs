@@ -34,7 +34,7 @@ for(const [width,height] of viewports){
  for(const screen of screens){
   if(screen!=='home'){
    await page.locator('[data-action="open-menu"]').click();
-   await page.locator('[data-open="'+screen+'"]').click();
+   await page.locator('.module-menu__item[data-open="'+screen+'"]').click();
   }else if(await page.locator('.app-shell').getAttribute('data-screen')!=='home'){
    await page.locator('.header-back').click();
   }
@@ -72,7 +72,7 @@ await p.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
 await p.locator('[data-action="login"]').click();
 if(await p.locator('.app-shell[data-screen="home"]').count()!==1)errors.push({issue:'Empty demo credentials should log in'});
 await p.locator('[data-action="open-menu"]').click();
-await p.locator('[data-open="raz"]').click();
+await p.locator('.module-menu__item[data-open="raz"]').click();
 let prev=await p.locator('.media-stage__counter').innerText();
 await p.locator('[data-action="next"]').click();
 let curr=await p.locator('.media-stage__counter').innerText();
@@ -87,16 +87,16 @@ if(curr===await p.locator('.media-stage__counter').innerText())errors.push({issu
 await p.locator('.header-back').click();
 if(await p.locator('.app-shell').getAttribute('data-screen')!=='home')errors.push({issue:'Header Back failed'});
 await p.locator('[data-action="open-menu"]').click();
-await p.locator('[data-open="phonics"]').click();
+await p.locator('.module-menu__item[data-open="phonics"]').click();
 prev=await p.locator('.media-stage__counter').innerText();
 await p.locator('[data-action="nextword"]').click();
 if(prev===await p.locator('.media-stage__counter').innerText())errors.push({issue:'Next phonics word failed'});
 await p.locator('[data-action="open-menu"]').click();
-await p.locator('[data-open="dub"]').click();
+await p.locator('.module-menu__item[data-open="dub"]').click();
 await p.locator('[data-action="record"]').click();
 if(!(await p.locator('.panel-footer').innerText()).includes('录音状态'))errors.push({issue:'Mock recording state failed'});
 await p.locator('[data-action="open-menu"]').click();
-await p.locator('[data-open="quiz"]').click();
+await p.locator('.module-menu__item[data-open="quiz"]').click();
 await p.locator('[data-choice="Rabbit"]').click();
 if(await p.locator('.answer.is-correct').count()!==1)errors.push({issue:'Quiz correctness style missing'});
 await p.locator('[data-action="logout"]').click();
