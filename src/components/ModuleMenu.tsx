@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 const modules:{to:string;id:string;label:string;icon:ReactNode}[]=[
  {to:'/',id:'home',label:'学习首页',icon:<House size={21}/>},
- {to:'/raz',id:'raz',label:'绘本阅读',icon:<BookOpen size={21}/>},
- {to:'/phonics',id:'phonics',label:'自然拼读',icon:<SpellCheck size={21}/>},
+ {to:'/reading/catalog',id:'raz',label:'绘本阅读',icon:<BookOpen size={21}/>},
+ {to:'/phonics/catalog',id:'phonics',label:'自然拼读',icon:<SpellCheck size={21}/>},
  {to:'/dub',id:'dub',label:'动画配音',icon:<Clapperboard size={21}/>},
- {to:'/quiz',id:'quiz',label:'单词闯关',icon:<Trophy size={21}/>}
+ {to:'/reading/exercises',id:'quiz',label:'单词闯关',icon:<Trophy size={21}/>}
 ];
 export function ModuleMenu({close}:{close:()=>void}){
  return <div className="module-menu__backdrop" onClick={close} data-role="menu-backdrop">
@@ -20,7 +20,7 @@ export function ModuleMenu({close}:{close:()=>void}){
       {icon}<span>{label}</span>
      </NavLink>)}
     </div>
-    <span className="module-menu__tip">完成一页学习后，也可以在这里选择其他课程</span>
+    <span className="module-menu__tip">选好课程或单词后，再开始学习</span>
    </div>
   </div>;
 }

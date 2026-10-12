@@ -75,3 +75,20 @@ RAZ 阅读、Oxford 拼读、Little Fox 配音和单词闯关进入后，顶部�
 退出必须两步：点击舞台返回按钮或使用 Android 系统返回键/返回手势 → 出现“要退出这次练习吗？”确认框 → **继续学习**（推荐，保留当前页面状态）或 **退出练习**（回到课程首页，重新进入将重置本页演示进度）。提示出现时再次按系统返回则取消提示。该确认逻辑在 `AppShell` 统一管理，所有练习页调用同一个 `usePracticeExit()`。首页仍保留顶部栏及课程入口。
 
 GitHub Pages 中可按 **Esc** 模拟 Android 返回键验证该交互；APK 通过 `@capacitor/app` 的 `backButton` 事件处理 Android 返回。原生设备系统返回手势行为还需安装最新版 APK 实测。
+
+## V0.5 横屏原生风格：分类 → 选练习 → 学习
+
+参考提供的五张横屏截图，布局借鉴，插画和课程文本是自行编写的离线 mock，不导入原 App 版权媒体。
+
+页面路由：
+- /phonics/catalog：系列侧栏 + 教材封面网格、搜索与收藏图标
+- /phonics/book/:bookId：自然拼读教材单元选择
+- /reading/catalog：主题分类侧栏 + 绘本封面目录
+- /reading/exercises：左侧主题，右侧分组展开/折叠、全选/取消、单词 chip、开始练习
+- /reading/book/:bookId/{read|record|exercise|words}：四模式图标工具栏阅读、录音、练习与单词
+- /quiz：单题全屏图文、发音图标、四宫格中文选项，使用勾选的词汇
+
+新增共享组件：CatalogLayout、BookCard、ExerciseGroupCard、ModeTabBar、IconButton、PracticeBack。
+
+验收：7 组视口 × 13 个路由 = 91 个页面截图，加上菜单、教材、选词、答案反馈、退出确认与模式切换交互验证。
+正式学习页一屏完成；目录浏览允许局部滚动；所有工具图标带 aria-label；播放、录音、收藏与服务器鉴权仍为 Mock。
