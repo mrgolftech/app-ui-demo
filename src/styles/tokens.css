@@ -17,3 +17,6 @@ button:disabled{opacity:.46;cursor:not-allowed}
 #root input,#root textarea,#root [contenteditable="true"],#root .allow-selection{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 #root img{user-select:none;-webkit-user-drag:none}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* Keep text editing/selecting usable only inside actual form controls. */
+#root .login-form input{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
