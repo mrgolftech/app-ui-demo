@@ -19,6 +19,14 @@ for(const [width,height] of viewports){
 
  for(const screen of screens){
   if(screen!=='home')await page.goto('http://127.0.0.1:4173/#/'+screen,{waitUntil:'networkidle'});
+  await page.locator('.app-shell[data-screen="'+screen+'"]').waitFor({state:'visible'});
+  if(screen!=='home'){
+   // A hash-only navigation can resolve before React updates the <img>.
+   // Wait for decoding the CURRENT route's image instead of a timed sleep.
+   await page.locator('.media-stage__art img').evaluate(async img=>{
+    try{await img.decode();}catch{/* imageReady below reports actual failures */}
+   });
+  }
   const d=await page.evaluate(()=>{
    const root=document.documentElement,app=document.querySelector('.app-shell');
    const controls=[...document.querySelectorAll('.study-actions button,.course-card,.practice-back,.header-menu,.header-logout')];
