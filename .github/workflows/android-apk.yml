@@ -79,6 +79,18 @@ jobs:
           chmod 600 android/app/signing/release.p12
           test -s android/app/signing/release.p12
 
+      - name: Verify fixed release certificate
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+        run: |
+          CERT_SHA256="$(keytool -list -v -keystore android/app/signing/release.p12 -storetype PKCS12 -storepass:env RELEASE_STORE_PASSWORD -alias kids-ui-demo-release | sed -n 's/^[[:space:]]*SHA256: //p' | head -n 1)"
+          EXPECTED_SHA256="7D:0D:B4:5A:5B:AA:77:32:59:11:EB:66:42:6E:A5:5D:7D:DA:4F:95:33:B6:28:E8:94:9B:63:EC:39:64:1C:2A"
+          if [[ "$CERT_SHA256" != "$EXPECTED_SHA256" ]]; then
+            echo "::error::Release signing certificate is not the original fixed identity"
+            exit 1
+          fi
+          echo "Release certificate fingerprint verified"
+
       - name: Build signed Release APK
         env:
           ANDROID_RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/android/app/signing/release.p12
