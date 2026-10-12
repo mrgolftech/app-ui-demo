@@ -20,20 +20,25 @@ export function LoginPage(){
  }
  return <main className="login-screen" data-screen="login">
   <section className="login-hero" aria-label="学习欢迎页">
-    <span className="login-hero__eyebrow"><Sparkles size={17}/> ENGLISH ADVENTURE</span>
-    <h1>和小伙伴一起<br/><span>快乐学英语！</span></h1>
+    <span className="login-hero__eyebrow"><Sparkles size={17}/> ENGLISH LEARNING ADVENTURE</span>
+    <h1>小小英语星球<br/><span>快乐学英语！</span></h1>
     <p>自然拼读 · 分级阅读 · 动画配音</p>
+    <div className="login-hero__creator" aria-label="作者与小红书账号">
+      <span className="login-hero__creator-label">原创学习空间 · 创作者</span>
+      <strong>安宝贝的彩虹书架</strong>
+      <span className="login-hero__social"><BookOpen size={14}/> 小红书同名博主</span>
+    </div>
     <div className="login-hero__art" aria-hidden="true">
       <img src={import.meta.env.BASE_URL+'assets/rabbit.svg'} alt="" draggable={false}/>
     </div>
-    <span className="login-hero__foot">每一屏，一个快乐的学习任务</span>
+    <span className="login-hero__foot">陪孩子探索英语世界的每一个小惊喜</span>
   </section>
   <section className="login-side">
     <div className="login-panel">
       <div className="login-panel__heading">
         <div className="login-panel__eyebrow"><BookOpen size={18}/> 学习小天地</div>
         <h2>欢迎回来！</h2>
-        <p>登录后开启今天的英语冒险</p>
+        <p>开启今天的英语学习之旅</p>
       </div>
       <form className="login-form" onSubmit={submit} autoComplete="off">
         <label htmlFor="demo-username">用户名</label>
