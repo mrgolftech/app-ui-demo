@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
-const viewports=[[1920,1080],[1600,900],[1280,800],[1024,768],[960,540],[844,390],[390,844]];
+// Include Android WebView-like CSS sizes where short-height media queries can collapse the content grid.
+const viewports=[[1920,1080],[1600,900],[1280,800],[1024,768],[1024,480],[960,540],[900,420],[844,390],[390,844]];
 const routes=[
  {name:'home',path:'/'},
  {name:'phonics-catalog',path:'/phonics/catalog'},
@@ -22,6 +23,11 @@ fs.mkdirSync('visual-evidence',{recursive:true});
 async function login(page){
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await page.locator('.login-screen').waitFor();
+ const creator=await page.locator('.login-hero__creator').innerText();
+ if(!creator.includes('安宝贝的彩虹书架')||!creator.includes('小红书'))
+  errors.push({issue:'login branding missing creator identity'});
+ const size=page.viewportSize();
+ if(size)await page.screenshot({path:'visual-evidence/login-'+size.width+'x'+size.height+'.png'});
  await page.locator('[data-action="login"]').click();
  await page.locator('.app-shell[data-screen="home"]').waitFor();
 }
@@ -60,6 +66,22 @@ for(const [width,height] of viewports){
    const images=[...document.querySelectorAll('img')];
    const ready=images.filter(img=>img.complete&&img.naturalWidth>0).length;
    const artifacts=[...document.querySelectorAll('.reader-toolbar,.catalog-main,.quiz-choices,.book-grid')];
+   const rail=document.querySelector('.category-rail');
+   const catalogContent=document.querySelector('.catalog-content');
+   const catalogMain=document.querySelector('.catalog-main');
+   let catalogLayout=null;
+   if(rail&&catalogContent&&catalogMain){
+    const r=rail.getBoundingClientRect();
+    const c=catalogContent.getBoundingClientRect();
+    const m=catalogMain.getBoundingClientRect();
+    catalogLayout={
+     valid:Math.abs(r.top-c.top)<=3 && c.left>=r.right-3 &&
+       c.right>=m.right-30 && c.width>=Math.min(200,m.width*.5),
+     rail:[Math.round(r.left),Math.round(r.top),Math.round(r.width)],
+     content:[Math.round(c.left),Math.round(c.top),Math.round(c.width)],
+     containerWidth:Math.round(m.width)
+    };
+   }
    return {
     scrollWidth:root.scrollWidth,scrollHeight:root.scrollHeight,
     appHeight:app.getBoundingClientRect().height,
@@ -67,7 +89,7 @@ for(const [width,height] of viewports){
     practiceBackCount:document.querySelectorAll('.practice-back').length,
     readerToolbarCount:document.querySelectorAll('.reader-toolbar').length,
     catalogCount:document.querySelectorAll('.catalog-main').length,
-    images:images.length,ready,clipped,structure:artifacts.length
+    images:images.length,ready,clipped,structure:artifacts.length,catalogLayout
    };
   });
   evidence.push({width,height,screen:name,...d});
@@ -80,6 +102,8 @@ for(const [width,height] of viewports){
   if(name.startsWith('reading-book-')&&d.readerToolbarCount!==1)errors.push({width,height,screen:name,issue:'missing four-mode reading toolbar'});
   if(['reading-exercises','reading-catalog','phonics-catalog'].includes(name)&&d.catalogCount!==1)
     errors.push({width,height,screen:name,issue:'missing split category rail'});
+  if(d.catalogLayout&&!d.catalogLayout.valid)
+    errors.push({width,height,screen:name,issue:'catalog rail and resource content must share a row and fill the width',details:d.catalogLayout});
   await page.screenshot({path:'visual-evidence/'+name+'-'+width+'x'+height+'.png',fullPage:false});
  }
  await page.close();
