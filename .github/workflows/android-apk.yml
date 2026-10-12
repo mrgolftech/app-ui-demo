@@ -38,6 +38,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Verify release-signing Gradle patch
+        run: node --test tests/android-release.test.mjs
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
