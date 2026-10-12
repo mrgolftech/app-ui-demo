@@ -26,9 +26,9 @@ brand/
     ├── logo-mark.svg
     ├── logo-mark-{128,256,512,1024}.png
     ├── logo-horizontal.svg
-    ├── logo-horizontal-1180.png
+    ├── logo-horizontal-870.png
     ├── logo-horizontal-dark.svg
-    ├── logo-horizontal-dark-1180.png
+    ├── logo-horizontal-dark-870.png
     ├── logo-dark-tile.svg
     ├── logo-dark-tile-512.png
     ├── app-icon.svg
@@ -52,7 +52,7 @@ brand/
 | 首页、登录页品牌图形 | `dist/logo-mark.svg` | 透明背景；不在图形内部添加中文 |
 | 网站导航 Header | `dist/logo-horizontal.svg` | 容器宽度足够；字标不要缩到难以阅读 |
 | 深色背景导航 | `dist/logo-horizontal-dark.svg` | 白色标准字；彩色图形沿用 |
-| App Launcher / PWA icon | `dist/app-icon-512.png`、`dist/app-icon-192.png` | 图标是完整浅色方形，Android 可能再施加裁切 |
+| App Launcher / PWA icon | `dist/app-icon-512.png`、`dist/app-icon-192.png` | 图标是全画布不透明浅色底（iOS 不出现透明角）；Android 可再施加系统裁切 |
 | Android adaptive icon | `dist/android/mipmap-*/ic_launcher_foreground.png` + 背景色 | 图形位于 108dp 画布中心安全范围，不再自行裁成圆形 |
 | 网页 favicon | `dist/favicon.svg`，或 `favicon-32.png` | 16~32px 不用带 ABC 的复杂主图 |
 | iOS / Safari | `dist/apple-touch-icon-180.png` | 直接提供 180px 方形 |
