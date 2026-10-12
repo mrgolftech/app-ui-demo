@@ -15,7 +15,6 @@ import { PhonicsBookPage } from './pages/PhonicsBookPage';
 import { ReadingCatalogPage } from './pages/ReadingCatalogPage';
 import { ReadingExerciseSelectPage } from './pages/ReadingExerciseSelectPage';
 import { ReadingBookPage } from './pages/ReadingBookPage';
-import { useFullscreenStatusBar } from './hooks/useFullscreenStatusBar';
 import './styles/tokens.css';
 import './styles/shell.css';
 import './styles/study.css';
@@ -31,7 +30,7 @@ function LoginRoute(){
  return signedIn?<Navigate to="/" replace/>:<LoginPage/>;
 }
 function Application(){
- useFullscreenStatusBar();
+ // Android system bars are handled by MainActivity to avoid conflicting WebView calls.
  return <HashRouter><Routes>
   <Route path="/login" element={<LoginRoute/>}/>
   <Route element={<RequireDemoAuth><AppShell/></RequireDemoAuth>}>
