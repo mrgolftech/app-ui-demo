@@ -110,3 +110,9 @@ GitHub Pages 中可按 **Esc** 模拟 Android 返回键验证该交互；APK 通
 - Release APK 完成后先执行 Android `apksigner verify --verbose --print-certs`，再上传 `app-ui-demo-signed-release-apk`。
 - [完整签名配置、构建、下载安装、常见问题](docs/ANDROID_RELEASE.md)。
 - Play Protect/荣耀应用市场未审核提醒并不因 Release 签名自动消失，应正常完成安全检测。
+
+## 品牌设计资产（彩虹书架）
+
+新增 [`brand/README.md`](brand/README.md) 作为后续商业化英语学习 App 的品牌图形规范与研发资产清单。首批包含彩虹书架 ABC 矢量主标、简化 favicon、品牌配色、安全留白、Web 横版标志、深色版、Android legacy/adaptive launcher 图标及可重复执行的 SVG→PNG 生成脚本；导出文件位于 [`brand/dist/`](brand/dist/)（由 `brand-assets.yml` 自动生成并提交）。
+
+**注意：** 品牌资源目前只作为后续前端和 APK 设计参考，尚未替换当前演示 UI 中的「小小英语星球」标题，也未修改正式签名、应用包名或 APK 构建参数。正式品牌替换需单独开发和验收。
