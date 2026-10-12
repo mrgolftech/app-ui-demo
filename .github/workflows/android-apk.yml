@@ -29,11 +29,17 @@ jobs:
         env:
           RELEASE_KEY_B64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_B64 }}
           RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          KEY_VAR_EXISTS: ${{ vars.ANDROID_RELEASE_KEYSTORE_B64 != '' }}
+          PASSWORD_VAR_EXISTS: ${{ vars.ANDROID_RELEASE_STORE_PASSWORD != '' }}
         run: |
           if [[ -z "$RELEASE_KEY_B64" || -z "$RELEASE_STORE_PASSWORD" ]]; then
-            echo "::error::Configure ANDROID_RELEASE_KEYSTORE_B64 and ANDROID_RELEASE_STORE_PASSWORD in Settings > Secrets and variables > Actions, then rerun this workflow."
+            echo "::error::Release signing credentials unavailable to this workflow: check the TWO Repository Secrets (not Variables or Environment secrets)."
+            if [[ "$KEY_VAR_EXISTS" == "true" || "$PASSWORD_VAR_EXISTS" == "true" ]]; then
+              echo "::error::Found matching Actions VARIABLES. Move credentials to Secrets: variables are not appropriate for private signing keys."
+            fi
             exit 1
           fi
+          echo "Both protected Repository Secrets are readable (values not printed)."
 
       - uses: actions/setup-node@v4
         with:
