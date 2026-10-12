@@ -51,7 +51,7 @@ npm install
 npm run dev          # http://localhost:5173/
 npm run build
 npm run preview      # http://localhost:4173/
-npm run test:visual  # 7 种分辨率 × [登录+五页] = 42 个截图与交互检查
+npm run test:visual  # 9 组分辨率 × 13 个路由，另覆盖登录和交互
 ```
 
 自动视觉验收覆盖 1920×1080、1600×900、1280×800、1024×768、960×540、844×390、390×844。验证首屏显示登录页、任意账号密码可登录、学习页无顶部/底部导航、练习舞台左上返回、确认/取消退出、Esc（模拟系统返回键）、登出、登录保护和核心布局。
@@ -60,9 +60,9 @@ npm run test:visual  # 7 种分辨率 × [登录+五页] = 42 个截图与交互
 
 - [GitHub Pages 自动部署](https://github.com/mrgolftech/app-ui-demo/actions/workflows/pages.yml)：发布 Vite `dist/`。
 - [浏览器 UI 截图与验收](https://github.com/mrgolftech/app-ui-demo/actions/workflows/visual-check.yml)。
-- [Android Debug APK](https://github.com/mrgolftech/app-ui-demo/actions/workflows/android-apk.yml)：先 Vite 构建，再 `npx cap add android && npx cap sync android`，运行 `node scripts/patch-android.mjs`，最后 Gradle 打包 `app-debug.apk`，以 Actions Artifact 提供。
+- [Android 固定签名 Release APK](https://github.com/mrgolftech/app-ui-demo/actions/workflows/android-apk.yml)：从 Repository Secrets 恢复固定私钥，打包 `assembleRelease`，执行 `apksigner verify`，产物为 `app-ui-demo-signed-release-apk`（内含 `app-release.apk`）。**首次需要先配置两个 Repository Secrets**，见 [Android Release 签名与下载安装指南](docs/ANDROID_RELEASE.md)。
 
-Android 16 新的 Edge-to-Edge 机制会影响部分状态栏背景和覆盖参数；这里使用的是隐藏**状态栏本身**的接口，而不是更改背景色。构建成功仅验证 APK 产生，状态栏、手势、刘海/安全区和沉浸式视觉体验仍需真机验收。
+Android 16 新的 Edge-to-Edge 机制会影响系统栏与安全区；当前原生沉浸式模式会在 App 启动和恢复焦点时隐藏顶部状态栏及底部导航条，用户滑动可以临时呼出。CI 通过不等于真机验收通过。
 
 ## 安全与边界
 
@@ -102,3 +102,11 @@ GitHub Pages 中可按 **Esc** 模拟 Android 返回键验证该交互；APK 通
 - 取消 React 层再次调用 `StatusBar.hide()`，避免与原生 WindowInsets 策略冲突。安全区 CSS 仍保持，刘海、手势及 Android 16 需实机核验。
 - Playwright 添加 900×420、1024×480 两组横屏 WebView 典型尺寸，并针对所有带分类侧栏页面检查 **侧栏与内容同一行、内容占满右侧区域**；登录界面也核验作者信息。
 - 构建：提交触发 [Android APK CI](https://github.com/mrgolftech/app-ui-demo/actions/workflows/android-apk.yml) 和 [视觉验收 CI](https://github.com/mrgolftech/app-ui-demo/actions/workflows/visual-check.yml)。CI 成功不等于 Android 真机验收成功。
+
+## V0.7：固定签名 Release 测试包
+
+- 用私有 PKCS12 keystore + 两个 GitHub Actions Secrets 实现稳定开发者签名；不在公开仓库提交私钥。
+- 自动增长 Android `versionCode`，从此前 Debug 包切换到 Release 包需要先卸载旧版，之后可用相同私钥覆盖升级。
+- Release APK 完成后先执行 Android `apksigner verify --verbose --print-certs`，再上传 `app-ui-demo-signed-release-apk`。
+- [完整签名配置、构建、下载安装、常见问题](docs/ANDROID_RELEASE.md)。
+- Play Protect/荣耀应用市场未审核提醒并不因 Release 签名自动消失，应正常完成安全检测。
