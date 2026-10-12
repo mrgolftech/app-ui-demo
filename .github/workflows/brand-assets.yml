@@ -44,7 +44,7 @@ jobs:
         run: |
           test -s brand/dist/logo-mark-1024.png
           test -s brand/dist/app-icon-512.png
-          test -s brand/dist/logo-horizontal-1180.png
+          test -s brand/dist/logo-horizontal-870.png
           test -s brand/dist/favicon-16.png
           test -s brand/dist/android/mipmap-xxxhdpi/ic_launcher_foreground.png
           test -s brand/dist/manifest.json
