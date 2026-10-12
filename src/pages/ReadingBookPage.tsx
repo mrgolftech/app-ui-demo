@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Volume2, HandPointer, Settings2,
+import { ChevronLeft, ChevronRight, Volume2, Hand, Settings2,
    List, Headphones, Mic, Check, RotateCcw, Star } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { IconButton } from '../components/IconButton';
@@ -29,7 +29,7 @@ export function ReadingBookPage(){
     <ModeTabBar/>
     <div className="reader-toolbar__title"><strong>{book.name}</strong><small>Reading A-Z · Level C</small></div>
     <IconButton label="听书" icon={<Headphones size={22}/>} onClick={speak} tone="white"/>
-    <IconButton label="点读" icon={<HandPointer size={22}/>} onClick={()=>notify('点读模式：模拟')} tone="white"/>
+    <IconButton label="点读" icon={<Hand size={22}/>} onClick={()=>notify('点读模式：模拟')} tone="white"/>
     <IconButton label="设置" icon={<Settings2 size={22}/>} onClick={()=>notify('阅读设置：模拟')} tone="white"/>
    </header>
    <div className="reader-content">
