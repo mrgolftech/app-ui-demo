@@ -29,6 +29,7 @@ for(const [width,height] of viewports){
  await page.locator('input[name="username"]').fill('demo-anyone');
  await page.locator('input[name="password"]').fill('any-password');
  await page.locator('[data-action="login"]').click();
+ await page.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
  if(await page.locator('.app-shell[data-screen="home"]').count()!==1)
   errors.push({width,height,issue:'Demo login failed'});
  for(const screen of screens){
@@ -70,6 +71,7 @@ const p=await browser.newPage({viewport:{width:844,height:390},hasTouch:true});
 await p.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
 // Login should also accept empty credentials because this is explicitly a UI-only demo.
 await p.locator('[data-action="login"]').click();
+await p.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
 if(await p.locator('.app-shell[data-screen="home"]').count()!==1)errors.push({issue:'Empty demo credentials should log in'});
 await p.locator('[data-action="open-menu"]').click();
 await p.locator('.module-menu__item[data-open="raz"]').click();
@@ -85,6 +87,7 @@ await p.evaluate(()=>{
 });
 if(curr===await p.locator('.media-stage__counter').innerText())errors.push({issue:'RAZ touch swipe did not turn page'});
 await p.locator('.header-back').click();
+await p.locator('.app-shell[data-screen="home"]').waitFor({state:"visible"});
 if(await p.locator('.app-shell').getAttribute('data-screen')!=='home')errors.push({issue:'Header Back failed'});
 await p.locator('[data-action="open-menu"]').click();
 await p.locator('.module-menu__item[data-open="phonics"]').click();
@@ -100,9 +103,11 @@ await p.locator('.module-menu__item[data-open="quiz"]').click();
 await p.locator('[data-choice="Rabbit"]').click();
 if(await p.locator('.answer.is-correct').count()!==1)errors.push({issue:'Quiz correctness style missing'});
 await p.locator('[data-action="logout"]').click();
+await p.locator('.login-screen[data-screen="login"]').waitFor({state:"visible"});
 if(await p.locator('[data-screen="login"]').count()!==1)errors.push({issue:'Logout did not return to login'});
 // Protected learning route cannot be accessed without logging in again.
 await p.goto('http://127.0.0.1:4173/#/raz');
+await p.locator('.login-screen[data-screen="login"]').waitFor({state:"visible"});
 if(await p.locator('[data-screen="login"]').count()!==1)errors.push({issue:'Protected route bypassed login'});
 await p.close();
 await browser.close();
