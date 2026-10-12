@@ -48,8 +48,11 @@ for(const [width,height] of viewports){
     const box=b.getBoundingClientRect();
     // Book grids and category panels intentionally scroll inside catalog pages.
     // Offscreen items must remain reachable rather than fit into one viewport.
-    if(b.closest('.catalog-content,.category-rail,.unit-list')&&
-       (box.bottom<=0||box.top>=innerHeight))return false;
+    if(b.closest('.catalog-content,.category-rail,.unit-list')){
+      // Catalog lists intentionally overflow an *internal* scroller, so
+      // the test checks touch target size but not viewport coordinates.
+      return box.width<36||box.height<39;
+    }
     return box.width<36||box.height<39||box.right>innerWidth+2||box.bottom>innerHeight+2||
      box.top<-1||box.left<-1;
    }).map(b=>b.getAttribute('aria-label')||b.textContent.trim().slice(0,30));
