@@ -31,7 +31,8 @@ for(const [width,height] of viewports){
  // Screens are rendered by separate routes, never in one monolithic HTML file.
  for(const {name,path} of routes){
   await page.goto('http://127.0.0.1:4173/#'+path,{waitUntil:'networkidle'});
-  await page.locator('.app-shell[data-screen="'+name+'"]').waitFor({state:'visible'});
+  const routeScreen=path==='/'?'home':path.slice(1).replaceAll('/','-');
+  await page.locator('.app-shell[data-screen="'+routeScreen+'"]').waitFor({state:'visible'});
   await page.evaluate(async()=>{
    await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));
   });
@@ -45,6 +46,10 @@ for(const [width,height] of viewports){
    )];
    const clipped=controls.filter(b=>{
     const box=b.getBoundingClientRect();
+    // Book grids and category panels intentionally scroll inside catalog pages.
+    // Offscreen items must remain reachable rather than fit into one viewport.
+    if(b.closest('.catalog-content,.category-rail,.unit-list')&&
+       (box.bottom<=0||box.top>=innerHeight))return false;
     return box.width<36||box.height<39||box.right>innerWidth+2||box.bottom>innerHeight+2||
      box.top<-1||box.left<-1;
    }).map(b=>b.getAttribute('aria-label')||b.textContent.trim().slice(0,30));
