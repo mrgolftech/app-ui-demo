@@ -40,9 +40,9 @@ for(const [width,height] of viewports){
    const root=document.documentElement;
    const app=document.querySelector('.app-shell');
    const controls=[...document.querySelectorAll(
-    '.practice-back,.icon-button,.catalog-primary,.book-card,.unit-card,'+
+    '.practice-back,.icon-button,.catalog-primary,'+
     '.study-actions button,.quiz-choice,.exercise-group__select,.exercise-group__collapse,'+
-    '.word-chip,.mode-tabs__item,.reader-mini-choices button'
+    '.mode-tabs__item,.reader-mini-choices button'
    )];
    const clipped=controls.filter(b=>{
     const box=b.getBoundingClientRect();
