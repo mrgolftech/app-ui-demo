@@ -1,0 +1,16 @@
+{
+  "brand": "彩虹书架",
+  "version": "1.0.0",
+  "status": "geometric-vector-redraw-based-on-approved-image-concept",
+  "source": [
+    "../src/logo-mark.svg",
+    "../src/favicon.svg"
+  ],
+  "background": {
+    "light": "#F4F8FF",
+    "dark": "#081334",
+    "navy": "#17235B"
+  },
+  "note": "The main mark has no Chinese text; only A/B/C are integrated. Horizontal wordmark remains live SVG text and needs font review before formal trademark artwork.",
+  "vectorSourceSha256": "0400e0ce3e4b17b92d341a6cfbccc3d0f6f6049b768149170c9229a738dcb8fb"
+}
