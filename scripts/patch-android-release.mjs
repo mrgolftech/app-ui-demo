@@ -27,7 +27,7 @@ def ciReleaseBuildNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger
 android {
     defaultConfig {
         versionCode 10000 + ciReleaseBuildNumber
-        versionName "0.6.\${ciReleaseBuildNumber}"
+        versionName "0.6." + ciReleaseBuildNumber
     }
     signingConfigs {
         ciRelease {
