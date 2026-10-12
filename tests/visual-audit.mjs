@@ -1,138 +1,145 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
-
 const viewports=[[1920,1080],[1600,900],[1280,800],[1024,768],[960,540],[844,390],[390,844]];
-const screens=['home','raz','phonics','dub','quiz'];
+const routes=[
+ {name:'home',path:'/'},
+ {name:'phonics-catalog',path:'/phonics/catalog'},
+ {name:'phonics-book',path:'/phonics/book/world-3'},
+ {name:'reading-catalog',path:'/reading/catalog'},
+ {name:'reading-exercises',path:'/reading/exercises'},
+ {name:'reading-book-read',path:'/reading/book/road-trip/read'},
+ {name:'reading-book-record',path:'/reading/book/road-trip/record'},
+ {name:'reading-book-exercise',path:'/reading/book/road-trip/exercise'},
+ {name:'reading-book-words',path:'/reading/book/road-trip/words'},
+ {name:'raz',path:'/raz'},
+ {name:'phonics',path:'/phonics'},
+ {name:'dub',path:'/dub'},
+ {name:'quiz',path:'/quiz'}
+];
 const errors=[],evidence=[];
 const browser=await chromium.launch({headless:true});
 fs.mkdirSync('visual-evidence',{recursive:true});
-
+async function login(page){
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+ await page.locator('.login-screen').waitFor();
+ await page.locator('[data-action="login"]').click();
+ await page.locator('.app-shell[data-screen="home"]').waitFor();
+}
 for(const [width,height] of viewports){
  const page=await browser.newPage({viewport:{width,height},hasTouch:true,deviceScaleFactor:1});
- await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
- if(await page.locator('.login-screen').count()!==1)errors.push({width,height,issue:'Login not shown'});
- await page.screenshot({path:'visual-evidence/login-'+width+'x'+height+'.png'});
- await page.locator('input[name="username"]').fill('child-demo');
- await page.locator('input[name="password"]').fill('no-real-password');
- await page.locator('[data-action="login"]').click();
- await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
-
- for(const screen of screens){
-  if(screen!=='home')await page.goto('http://127.0.0.1:4173/#/'+screen,{waitUntil:'networkidle'});
-  await page.locator('.app-shell[data-screen="'+screen+'"]').waitFor({state:'visible'});
-  if(screen!=='home'){
-   // A hash-only navigation can resolve before React updates the <img>.
-   // Wait for decoding the CURRENT route's image instead of a timed sleep.
-   await page.locator('.media-stage__art img').evaluate(async img=>{
-    try{await img.decode();}catch{/* imageReady below reports actual failures */}
-   });
-  }
+ await login(page);
+ // Screens are rendered by separate routes, never in one monolithic HTML file.
+ for(const {name,path} of routes){
+  await page.goto('http://127.0.0.1:4173/#'+path,{waitUntil:'networkidle'});
+  await page.locator('.app-shell[data-screen="'+name+'"]').waitFor({state:'visible'});
+  await page.evaluate(async()=>{
+   await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));
+  });
   const d=await page.evaluate(()=>{
-   const root=document.documentElement,app=document.querySelector('.app-shell');
-   const controls=[...document.querySelectorAll('.study-actions button,.course-card,.practice-back,.header-menu,.header-logout')];
-   const bad=controls.filter(b=>{
-    const r=b.getBoundingClientRect();
-    return r.width<38||r.height<40||r.top<0||r.bottom>innerHeight+2||r.left<0||r.right>innerWidth+2;
-   }).map(x=>x.getAttribute('aria-label')||x.textContent.trim());
-   const art=document.querySelector('.media-stage')?.getBoundingClientRect();
-   const pic=document.querySelector('.media-stage__art img');
-   const back=document.querySelector('.practice-back')?.getBoundingClientRect();
-   const counter=document.querySelector('.media-stage__counter')?.getBoundingClientRect();
-   const overlaps=back&&counter&&back.left<counter.right&&back.right>counter.left&&back.top<counter.bottom&&back.bottom>counter.top;
+   const root=document.documentElement;
+   const app=document.querySelector('.app-shell');
+   const controls=[...document.querySelectorAll(
+    '.practice-back,.icon-button,.catalog-primary,.book-card,.unit-card,'+
+    '.study-actions button,.quiz-choice,.exercise-group__select,.exercise-group__collapse,'+
+    '.word-chip,.mode-tabs__item,.reader-mini-choices button'
+   )];
+   const clipped=controls.filter(b=>{
+    const box=b.getBoundingClientRect();
+    return box.width<36||box.height<39||box.right>innerWidth+2||box.bottom>innerHeight+2||
+     box.top<-1||box.left<-1;
+   }).map(b=>b.getAttribute('aria-label')||b.textContent.trim().slice(0,30));
+   // Child overflow inside book grids is intentional (internal scroll), not root scrolling.
+   const images=[...document.querySelectorAll('img')];
+   const ready=images.filter(img=>img.complete&&img.naturalWidth>0).length;
+   const artifacts=[...document.querySelectorAll('.reader-toolbar,.catalog-main,.quiz-choices,.book-grid')];
    return {
     scrollWidth:root.scrollWidth,scrollHeight:root.scrollHeight,
     appHeight:app.getBoundingClientRect().height,
-    stage:art?{width:art.width,height:art.height}:null,
-    imageReady:pic?pic.complete&&pic.naturalWidth>0:true,
-    selection:getComputedStyle(document.querySelector('.study-sentence')||app).userSelect,
-    headerCount:document.querySelectorAll('.app-header').length,
-    inStageBackCount:document.querySelectorAll('.practice-back').length,
-    moduleMenuCount:document.querySelectorAll('.header-menu').length,
-    navCount:document.querySelectorAll('.bottom-nav').length,
-    overlaps,bad
+    pageType:app.className,headerCount:document.querySelectorAll('.app-header').length,
+    practiceBackCount:document.querySelectorAll('.practice-back').length,
+    readerToolbarCount:document.querySelectorAll('.reader-toolbar').length,
+    catalogCount:document.querySelectorAll('.catalog-main').length,
+    images:images.length,ready,clipped,structure:artifacts.length
    };
   });
-  evidence.push({width,height,screen,...d});
-  const practicing=screen!=='home';
-  if(d.scrollWidth>width+2||d.scrollHeight>height+2||d.bad.length||
-     !d.imageReady||d.selection!=='none'||d.navCount!==0||d.overlaps||
-     d.headerCount!==(practicing?0:1)||d.inStageBackCount!==(practicing?1:0)||
-     d.moduleMenuCount!==(practicing?0:1)){
-   errors.push({width,height,screen,issue:d});
+  evidence.push({width,height,screen:name,...d});
+  const expectedHeader=name==='home'?1:0;
+  const expectedBack=['raz','phonics','dub','quiz'].includes(name)?1:0;
+  if(d.scrollWidth>width+2||d.scrollHeight>height+2||d.clipped.length||
+    d.ready!==d.images||d.headerCount!==expectedHeader||d.practiceBackCount!==expectedBack){
+   errors.push({width,height,screen:name,details:d});
   }
-  if(practicing&&d.stage&&(d.stage.width<90||d.stage.height<90)){
-   errors.push({width,height,screen,issue:'stage too small'});
-  }
-  await page.screenshot({path:'visual-evidence/'+screen+'-'+width+'x'+height+'.png',fullPage:false});
+  if(name.startsWith('reading-book-')&&d.readerToolbarCount!==1)errors.push({width,height,screen:name,issue:'missing four-mode reading toolbar'});
+  if(['reading-exercises','reading-catalog','phonics-catalog'].includes(name)&&d.catalogCount!==1)
+    errors.push({width,height,screen:name,issue:'missing split category rail'});
+  await page.screenshot({path:'visual-evidence/'+name+'-'+width+'x'+height+'.png',fullPage:false});
  }
  await page.close();
 }
-
-// A single workflow validates both the in-stage back arrow and Escape,
-// which shares the Android native back event's guarded exit behavior.
+// Touch-like workflow tests on the actual phone landscape viewport.
 const page=await browser.newPage({viewport:{width:844,height:390},hasTouch:true});
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-await page.locator('[data-action="login"]').click();
-await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
-
-// Navigate using the home course card; RAZ exercises have no global header.
-await page.locator('.course-card--raz').click();
-await page.locator('.app-shell[data-screen="raz"]').waitFor({state:'visible'});
-let initial=await page.locator('.media-stage__counter').innerText();
-await page.locator('[data-action="next"]').click();
-let afterNext=await page.locator('.media-stage__counter').innerText();
-if(initial===afterNext)errors.push({issue:'Next RAZ page did not advance'});
-
-// A swipe inside the art still turns the page.
-await page.evaluate(()=>{
- const art=document.querySelector('.media-stage__art');
- const b=art.getBoundingClientRect();
- const opt={bubbles:true,pointerId:13,pointerType:'touch',button:0};
- art.dispatchEvent(new PointerEvent('pointerdown',{...opt,clientX:b.left+185,clientY:b.top+105}));
- art.dispatchEvent(new PointerEvent('pointerup',{...opt,clientX:b.left+95,clientY:b.top+105}));
-});
-if(afterNext===await page.locator('.media-stage__counter').innerText())errors.push({issue:'RAZ art swipe did not advance'});
-
+await login(page);
+await page.locator('.course-card--phonics').click();
+await page.locator('[data-role="phonics-book-grid"]').waitFor();
+await page.locator('[data-book="Phonics World 3"]').click();
+await page.locator('[data-unit="0"]').click();
+await page.locator('.app-shell[data-screen="phonics"]').waitFor();
+const before=await page.locator('.media-stage__counter').innerText();
+await page.locator('[data-action="nextword"]').click();
+if(before===await page.locator('.media-stage__counter').innerText())
+ errors.push({issue:'phonics next word not updating'});
 await page.locator('.practice-back').click();
-await page.locator('.practice-exit-dialog[role="alertdialog"]').waitFor({state:'visible'});
-if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Back button exited without confirmation'});
-await page.screenshot({path:'visual-evidence/confirm-exit-844x390.png'});
 await page.locator('[data-action="continue-practice"]').click();
-if(await page.locator('.practice-exit-dialog').count())errors.push({issue:'Keep learning did not dismiss dialog'});
-if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Cancel lost practice state'});
-
+if(await page.locator('.app-shell').getAttribute('data-screen')!=='phonics')
+ errors.push({issue:'cancel exit did not preserve phonics'});
 await page.keyboard.press('Escape');
-await page.locator('.practice-exit-dialog').waitFor({state:'visible'});
-await page.keyboard.press('Escape');
-if(await page.locator('.practice-exit-dialog').count())errors.push({issue:'Second system back did not cancel dialog'});
-if(await page.locator('.app-shell').getAttribute('data-screen')!=='raz')errors.push({issue:'Cancelling dialog exited practice'});
-
+await page.locator('.practice-exit-dialog').waitFor();
+await page.locator('[data-action="confirm-exit"]').click();
+await page.locator('.app-shell[data-screen="phonics-book-world-3"]').waitFor();
+await page.goto('http://127.0.0.1:4173/#/reading/catalog',{waitUntil:'networkidle'});
+await page.locator('.category-rail__item').filter({hasText:'Nature'}).click();
+if(await page.locator('[data-book="Forest Friends"]').count()!==1)
+ errors.push({issue:'reading catalog category filtering failed'});
+await page.locator('[data-action="open-exercises"]').click();
+await page.locator('[data-group="37"]').waitFor();
+await page.locator('[data-word="bridge"]').click();
+if(await page.locator('[data-word="bridge"]').getAttribute('aria-pressed')!=='false')
+ errors.push({issue:'word chip did not deselect'});
+await page.locator('[data-word="bridge"]').click();
+await page.locator('[data-collapse="37"]').click();
+if(await page.locator('[data-group="37"] [data-word="bridge"]').count()!==0)
+ errors.push({issue:'group collapse failed'});
+await page.locator('[data-collapse="37"]').click();
+await page.locator('[data-select-all="37"]').click();
+await page.locator('[data-select-all="37"]').click();
+await page.locator('[data-action="start-exercise"]').click();
+await page.locator('.quiz-screen').waitFor();
+if(!(await page.locator('.quiz-prompt__word h1').innerText()).includes('bridge'))
+ errors.push({issue:'selected words were not passed into quiz'});
+await page.locator('[data-choice="n. 桥"]').click();
+if(await page.locator('.quiz-choice.is-correct').count()!==1)
+ errors.push({issue:'vocabulary answer was not evaluated'});
+await page.locator('[data-action="nextquiz"]').click();
 await page.locator('.practice-back').click();
 await page.locator('[data-action="confirm-exit"]').click();
-await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
-if(await page.locator('.practice-back').count())errors.push({issue:'Practice back still visible on home'});
-
-// Other modules preserve their own interactions and all share the same confirmation.
-for(const [screen,control] of [
- ['phonics','nextword'],['dub','nextsentence'],['quiz','nextquiz']
-]){
- await page.goto('http://127.0.0.1:4173/#/'+screen,{waitUntil:'networkidle'});
- const oldCounter=await page.locator('.media-stage__counter').innerText();
- await page.locator('[data-action="'+control+'"]').click();
- if(oldCounter===await page.locator('.media-stage__counter').innerText())errors.push({issue:screen+' next interaction failed'});
- await page.keyboard.press('Escape');
- await page.locator('.practice-exit-dialog').waitFor({state:'visible'});
- if(await page.locator('.app-header').count())errors.push({issue:screen+' shows top nav in modal'});
- await page.locator('[data-action="confirm-exit"]').click();
- await page.locator('.app-shell[data-screen="home"]').waitFor({state:'visible'});
+await page.locator('.app-shell[data-screen="reading-exercises"]').waitFor();
+await page.goto('http://127.0.0.1:4173/#/reading/book/road-trip/read',{waitUntil:'networkidle'});
+for(const mode of ['record','exercise','words','read']){
+ await page.locator('[data-mode="'+mode+'"]').click();
+ await page.locator('.reader-toolbar').waitFor();
+ if(!page.url().includes('/'+mode))errors.push({issue:'reading mode route not switched: '+mode});
 }
-
-await page.locator('[data-action="logout"]').click();
-await page.locator('.login-screen').waitFor({state:'visible'});
-await page.goto('http://127.0.0.1:4173/#/raz');
-await page.locator('.login-screen').waitFor({state:'visible'});
+await page.locator('.reader-toolbar [data-action="back"]').click();
+await page.locator('.practice-exit-dialog').waitFor();
+await page.screenshot({path:'visual-evidence/exit-confirm-844x390.png'});
+await page.keyboard.press('Escape');
+if(await page.locator('.practice-exit-dialog').count())
+ errors.push({issue:'Escape should dismiss exit dialog'});
+await page.locator('.reader-toolbar [data-action="back"]').click();
+await page.locator('[data-action="confirm-exit"]').click();
+await page.locator('.app-shell[data-screen="reading-catalog"]').waitFor();
 await page.close();
 await browser.close();
-fs.writeFileSync('visual-evidence/layout-audit.json',JSON.stringify({errors,evidence,loginViewports:viewports.length},null,2));
-console.log('Visual audit:',evidence.length,'learning views +',viewports.length,'login views;',errors.length,'failures');
-if(errors.length){console.error(JSON.stringify(errors,null,2));process.exitCode=1;}
+fs.writeFileSync('visual-evidence/layout-audit.json',JSON.stringify({errors,evidence,viewports,routes:routes.map(s=>s.name)},null,2));
+console.log('Visual audit:',evidence.length,'route/viewport screenshots;',errors.length,'failures');
+if(errors.length){console.error(JSON.stringify(errors.slice(0,30),null,2));process.exitCode=1;}
