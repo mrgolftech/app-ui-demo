@@ -55,7 +55,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add brand/dist
+          # Root .gitignore ignores dist/ globally; generated brand assets must be intentionally tracked.
+          git add -f brand/dist
           if git diff --cached --quiet; then
             echo "Assets already up-to-date."
           else
