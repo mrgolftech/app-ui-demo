@@ -92,3 +92,13 @@ GitHub Pages 中可按 **Esc** 模拟 Android 返回键验证该交互；APK 通
 
 验收：7 组视口 × 13 个路由 = 91 个页面截图，加上菜单、教材、选词、答案反馈、退出确认与模式切换交互验证。
 正式学习页一屏完成；目录浏览允许局部滚动；所有工具图标带 aria-label；播放、录音、收藏与服务器鉴权仍为 Mock。
+
+
+## V0.6：Android 真机适配修复和作者品牌
+
+- 修复 `src/styles/catalog.css` 中高度 ≤540px 的横屏断点：`.catalog-main` 的双列网格被误写为单列，导致 APK 内教材封面挤到左侧、右侧大面积空白。保留原浏览器设计，不重做资源内容。
+- 登录页延续蓝色渐变、插画和卡片化表单，展示 App 名称 **小小英语星球**、原创作者账号 **小红书 · 安宝贝的彩虹书架**。前端演示登录仍允许任意账号密码进入，未连接真实账号服务。
+- Android Activity 使用 `WindowInsetsController.hide(statusBars | navigationBars)`、滑动临时显示系统栏的 immersive sticky 体验，兼容旧系统的 `SYSTEM_UI_FLAG_IMMERSIVE_STICKY`；在启动、前后台切换、焦点恢复时重申。系统导航/返回手势保留，部分机型导航提示条可能短暂显示。
+- 取消 React 层再次调用 `StatusBar.hide()`，避免与原生 WindowInsets 策略冲突。安全区 CSS 仍保持，刘海、手势及 Android 16 需实机核验。
+- Playwright 添加 900×420、1024×480 两组横屏 WebView 典型尺寸，并针对所有带分类侧栏页面检查 **侧栏与内容同一行、内容占满右侧区域**；登录界面也核验作者信息。
+- 构建：提交触发 [Android APK CI](https://github.com/mrgolftech/app-ui-demo/actions/workflows/android-apk.yml) 和 [视觉验收 CI](https://github.com/mrgolftech/app-ui-demo/actions/workflows/visual-check.yml)。CI 成功不等于 Android 真机验收成功。
