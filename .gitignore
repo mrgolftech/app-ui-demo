@@ -4,3 +4,9 @@ android/
 visual-evidence/
 .DS_Store
 *.log
+
+# NEVER publish Android release signing keys or GitHub Actions secret exports
+*.p12
+*.jks
+*.keystore
+github-secrets.env
