@@ -1,6 +1,6 @@
 {
   "appId": "com.mrgolftech.kidsvisualdemo",
-  "appName": "Kids UI Demo",
+  "appName": "小小英语星球",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
