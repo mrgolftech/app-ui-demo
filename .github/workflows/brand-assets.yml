@@ -1,0 +1,64 @@
+name: Generate Brand Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'brand/src/**'
+      - 'brand/tools/**'
+      - 'brand/tokens.json'
+      - '.github/workflows/brand-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: brand-assets-main
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Prepare renderer
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chinese font and sharp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
+          npm install --no-audit --no-fund --no-save --no-package-lock sharp@0.34.4
+
+      - name: Generate web, Android and PNG exports
+        run: node brand/tools/generate.mjs
+
+      - name: Check generated assets
+        run: |
+          test -s brand/dist/logo-mark-1024.png
+          test -s brand/dist/app-icon-512.png
+          test -s brand/dist/logo-horizontal-1180.png
+          test -s brand/dist/favicon-16.png
+          test -s brand/dist/android/mipmap-xxxhdpi/ic_launcher_foreground.png
+          test -s brand/dist/manifest.json
+          find brand/dist -type f | sort
+          echo "Generated $(find brand/dist -type f | wc -l) files"
+
+      - name: Commit generated assets to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add brand/dist
+          if git diff --cached --quiet; then
+            echo "Assets already up-to-date."
+          else
+            git commit -m "build(brand): refresh derived web and Android logo assets"
+            git push origin HEAD:main
+          fi
