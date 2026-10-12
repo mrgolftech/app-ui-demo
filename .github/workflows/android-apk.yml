@@ -2,7 +2,7 @@ name: React UI Android Debug APK
 on:
   push:
     branches: [main]
-    paths: ['src/**','public/**','index.html','package.json','capacitor.config.json','tsconfig.json','vite.config.ts','.github/workflows/android-apk.yml']
+    paths: ['src/**','public/**','index.html','package.json','capacitor.config.json','tsconfig.json','vite.config.ts','scripts/**','.github/workflows/android-apk.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,15 +33,9 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('android/app/src/main/AndroidManifest.xml')
-          s=p.read_text()
-          needle='android:name=".MainActivity"'
-          assert needle in s, 'MainActivity not found'
-          assert 'android:screenOrientation=' not in s
-          p.write_text(s.replace(needle,needle+' android:screenOrientation="sensorLandscape"',1))
-          PY
+          node scripts/patch-android.mjs
+          grep -F 'android:screenOrientation="sensorLandscape"' android/app/src/main/AndroidManifest.xml
+          grep -F 'controller.hide(WindowInsets.Type.statusBars())' android/app/src/main/java/com/mrgolftech/kidsvisualdemo/MainActivity.java
       - name: Build debug APK
         run: |
           chmod +x android/gradlew
