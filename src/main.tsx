@@ -24,6 +24,7 @@ import './styles/login.css';
 import './styles/study-exit.css';
 import './styles/catalog.css';
 import './styles/reader.css';
+import './styles/quiz.css';
 
 function LoginRoute(){
  const {signedIn}=useDemoAuth();
