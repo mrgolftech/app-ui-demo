@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">彩虹书架图形标志</title>
+  <desc id="desc">一座彩虹拱桥笼罩ABC字母书架，下方为展开的书页</desc>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FF385B"/><stop offset="1" stop-color="#FF6747"/></linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFB11F"/><stop offset="1" stop-color="#FF8536"/></linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2=".85" y2="1"><stop stop-color="#8CDA4F"/><stop offset="1" stop-color="#10B98C"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2BD1FA"/><stop offset="1" stop-color="#086DFA"/></linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#C366F2"/><stop offset="1" stop-color="#743AF0"/></linearGradient>
+    <linearGradient id="pageL" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#45D7FB"/><stop offset=".65" stop-color="#058AFA"/><stop offset="1" stop-color="#2454ED"/></linearGradient>
+    <linearGradient id="pageR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#BCA4FF"/><stop offset=".65" stop-color="#9641EC"/><stop offset="1" stop-color="#6530D9"/></linearGradient>
+  </defs>
+  <!-- An intentionally redrawn geometric master, not a raster image disguised as SVG. -->
+  <g fill="none" stroke-width="21" stroke-linecap="round">
+    <path d="M70 282 C86 156 153 75 255 75 C355 75 429 157 442 282" stroke="#FF4562"/>
+    <path d="M91 282 C109 168 170 99 255 99 C342 99 408 168 422 282" stroke="#FF9B2E"/>
+    <path d="M111 281 C130 178 185 122 255 122 C326 122 389 183 402 281" stroke="#FFD33F"/>
+    <path d="M132 280 C150 192 195 145 255 145 C316 145 367 193 382 280" stroke="#49CE85"/>
+    <path d="M153 280 C169 208 205 167 255 167 C306 167 347 208 362 280" stroke="#159EF7"/>
+    <path d="M174 279 C188 220 222 189 255 189 C292 189 326 220 341 279" stroke="#714EFF"/>
+  </g>
+  <!-- Five vertical books are silhouetted as a single visual family. -->
+  <path d="M96 283 Q96 269 110 265 L139 254 Q153 250 160 264 V383 L96 377 Z" fill="url(#red)"/>
+  <path d="M166 239 Q166 224 181 220 L207 214 Q222 213 222 228 V406 L166 385 Z" fill="url(#orange)"/>
+  <path d="M228 212 Q228 198 244 198 H271 Q287 198 287 214 V423 L257 449 L228 423 Z" fill="url(#green)"/>
+  <path d="M292 230 Q292 216 306 219 L335 223 Q350 226 350 241 V389 L292 410 Z" fill="url(#blue)"/>
+  <path d="M355 263 Q356 250 369 254 L402 265 Q416 270 416 286 V378 L355 384 Z" fill="url(#violet)"/>
+  <!-- Hand-built monoline ABC outlines; no installed fonts required. -->
+  <g stroke="#FFFDF7" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M180 303 L194 263 L208 303 M185 290 H203"/>
+    <path d="M245 257 V305 M246 257 H258 C279 257 276 281 254 281 H246 M246 281 H259 C282 281 278 305 255 305 H246"/>
+    <path d="M333 258 C306 243 305 270 305 280 C306 303 318 307 334 297"/>
+  </g>
+  <g fill="#FFFDF7" opacity=".7">
+    <rect x="111" y="287" width="29" height="8" rx="4" transform="rotate(-14 111 287)"/>
+    <rect x="369" y="285" width="30" height="8" rx="4" transform="rotate(14 369 285)"/>
+  </g>
+  <!-- Open pages extend from the center; the central white V is the page gutter. -->
+  <path d="M55 379 C112 344 188 359 256 402 L256 456 C192 420 136 418 98 438 Q83 441 75 426 Z" fill="url(#pageL)"/>
+  <path d="M457 379 C401 344 326 359 256 402 L256 456 C320 420 377 418 415 438 Q430 441 437 426 Z" fill="url(#pageR)"/>
+  <path d="M61 377 C119 347 191 360 256 402 C321 360 395 347 451 377" fill="none" stroke="#FFFDF9" stroke-width="15" stroke-linecap="round"/>
+  <path d="M76 391 C140 372 205 389 256 421 C307 389 373 372 436 391" fill="none" stroke="#E9F6FF" stroke-width="7" opacity=".68"/>
+</svg>
